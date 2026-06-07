@@ -187,14 +187,17 @@ MVP effects:
 
 Later:
 
-1. More ambient-matrix effects.
-2. Palettes.
+1. More ambient-matrix effects (Gradient, Color Transition, Particles, Tornado).
+2. Palettes (port ~10 from GyverLamp2, support custom palette via HA).
 3. Auto mode / random mode.
 4. Music-reactive effects.
 5. Clock display (HH:MM or hours only).
 6. Temperature / percent digit display.
 7. Weather ambient effects (rain, sun, storm, snow).
 8. Morse code mode (blink any text from HA).
+9. Song-change detection (autonomous via INMP441).
+10. Sleep timer (fade out after N minutes).
+11. Clap detection (1 / 2 / 3 claps → actions).
 
 ### Home Assistant entities
 
@@ -346,6 +349,103 @@ Unit duration is configurable (speed param), e.g. 150–300 ms per unit.
 **Input:** a `text` entity or HA script parameter. Example: send `"SOS"` → lamp blinks `··· — — — ···`.
 
 This is a standalone effect mode, not part of the ambient effect rotation.
+
+---
+
+### Crossfade between effects
+
+When switching effects, blend the outgoing and incoming frames over ~0.5–1.5 seconds instead of cutting abruptly.
+
+**Implementation:**
+
+`EffectEngine` maintains two pixel buffers. During a transition it renders both effects simultaneously and outputs a weighted blend:
+
+```cpp
+pixel_out = lerp(buffer_a, buffer_b, alpha);  // alpha: 0.0 → 1.0
+```
+
+Memory cost: 256 × 3 bytes × 2 buffers = ~1.5 KB — negligible on ESP32.
+
+Transition duration is configurable. Default ~1 second. Crossfade applies to all effect switches: manual, auto-rotation, and song-change trigger.
+
+Ported from GyverLamp2 fade-between-presets behavior.
+
+---
+
+### Song-change detection (autonomous)
+
+Detects when a song changes using INMP441 audio input only — no Home Assistant, no metadata, fully autonomous.
+
+**Algorithm — spectral fingerprint comparison:**
+
+```text
+Maintain a rolling FFT average across 3 frequency bands (low / mid / high)
+over a 20–30 second window  →  this is the "current song fingerprint"
+
+Every 3–5 seconds, compare the current snapshot to the rolling average.
+If the difference exceeds a threshold in multiple bands simultaneously
+→ declare "song changed" → trigger effect change with random seed
+→ reset rolling average
+→ start debounce timer (30 s minimum before next trigger)
+```
+
+**False positives:** acceptable by design. If a loud chorus or voice causes a false trigger, the lamp just picks a new random effect — not a problem.
+
+**Voice interference:** a brief voice moment (2–3 s) does not significantly shift a 30-second rolling average. Debounce prevents rapid re-triggering.
+
+**Effect change on song detection:**
+- Pick a random effect from the ambient pool
+- Apply a random seed → same effect algorithm, different visual character
+- Crossfade into the new effect
+
+**Reference:** based on GyverLamp2's FFT_C.h + VolAnalyzer.h, extended with spectral comparison logic.
+
+---
+
+### Sleep timer
+
+Fade the lamp to off after a configurable number of minutes.
+
+```text
+Trigger: HA script / button hold / voice command
+Action: lamp fades to 0 over the remaining time (linear or exponential)
+At zero: lamp turns off, timer resets
+Cancel: any manual brightness change cancels the timer
+```
+
+GyverLamp2 equivalent: `GL,0,13,<minutes>` command.
+
+Exposed in HA as a `number.lamp_sleep_timer` entity (0 = disabled, 1–120 minutes).
+
+---
+
+### Clap detection
+
+Detects 1, 2, or 3 claps via INMP441 and maps them to configurable actions.
+
+**Algorithm:** derivative-based edge detection (ported from GyverLamp2 `Clap.h`):
+- Sample every 10 ms
+- Detect rising/falling edge above threshold (default 150)
+- Count claps within a 700 ms window
+- 200 ms debounce between claps
+
+**Default mapping (configurable via HA):**
+
+| Claps | Action |
+|---|---|
+| 1 | Toggle on / off |
+| 2 | Next effect |
+| 3 | Previous effect |
+
+Actions are configurable from Home Assistant — no reflash needed.
+
+---
+
+### Poweramp visual effects — reference
+
+Poweramp (Android music player) has built-in audio visualizations. Not pixel-based, but worth reviewing for animation pattern ideas when designing music-reactive effects.
+
+*Note: review Poweramp visualization styles when working on music-reactive effects in Phase 6.*
 
 ---
 
