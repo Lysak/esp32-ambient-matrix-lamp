@@ -1,0 +1,45 @@
+#pragma once
+#include "canvas.h"
+#include "matrix.h"
+#include <cstdint>
+#include <memory>
+
+namespace ambient_matrix {
+
+enum class EffectId : uint8_t {
+    Rainbow = 0,
+    Color, ColorShift, Gradient,
+    Perlin, Particles,
+    Fire, Fire2020,
+    Confetti, Tornado,
+};
+
+struct EffectParams {
+    uint8_t speed = 128;
+    uint8_t scale = 128;
+    uint8_t color = 0;   // base hue 0-255
+};
+
+class Effect {
+public:
+    virtual void reset() {}
+    virtual void tick(MatrixCanvas& canvas, const Matrix& matrix,
+                      const EffectParams& params, uint32_t now_ms) = 0;
+    virtual ~Effect() = default;
+};
+
+class EffectEngine {
+public:
+    explicit EffectEngine(Matrix matrix);
+
+    void set_effect(EffectId id);
+    void set_params(EffectParams params);
+    void tick(MatrixCanvas& canvas, uint32_t now_ms);
+
+private:
+    Matrix                 matrix_;
+    EffectParams           params_;
+    std::unique_ptr<Effect> effect_;
+};
+
+} // namespace ambient_matrix

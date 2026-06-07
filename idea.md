@@ -198,6 +198,7 @@ Later:
 9. Song-change detection (autonomous via INMP441).
 10. Sleep timer (fade out after N minutes).
 11. Clap detection (1 / 2 / 3 claps → actions).
+12. Flag display effect (Ukraine, USA, EU, UK, France, and others).
 
 ### Home Assistant entities
 
@@ -476,6 +477,51 @@ Home Assistant → OpenWeatherMap integration
 ```
 
 Weather effects are lower priority than core ambient effects. Implemented in Phase 4 or later.
+
+---
+
+### Flag display effect
+
+Render a national flag as a static or animated fill across the 16×16 matrix.
+
+**Supported flags (planned):**
+
+| Flag | Colors / layout |
+|---|---|
+| Ukraine | blue top half, yellow bottom half |
+| USA | red/white horizontal stripes + blue canton with white dots |
+| EU | blue field + ring of 12 yellow dots |
+| UK | Union Jack — red cross + diagonal red/white/blue |
+| France | blue, white, red vertical stripes |
+| Poland | white top, red bottom |
+| Germany | black, red, gold horizontal stripes |
+| Japan | white field + red circle |
+| Canada | red, white, red vertical with red maple leaf |
+
+**Rendering approach:**
+
+Simple flags (horizontal/vertical stripes) — direct pixel fill per row/column using a data table. Complex flags (EU ring, Union Jack, maple leaf) — approximated at 16×16 using a pixel art raster encoded as a constant uint8 array (one byte per pixel, palette-indexed).
+
+**Animation modes:**
+
+```text
+Static       — paint flag once, hold
+Scroll       — flag scrolls horizontally in a loop (good for panoramic effect)
+Wave         — vertical sine wave distortion on each column (flag blowing in wind)
+Pulse        — brightness slowly pulses ±20%
+```
+
+**Integration:**
+
+```text
+Home Assistant → select.lamp_flag (dropdown of available flags)
+Home Assistant → select.lamp_flag_animation (static / scroll / wave / pulse)
+ESPHome effect lambda calls FlagEffect::tick()
+```
+
+Flag definitions stored as const structs in `effects-core/include/ambient_matrix/effect_flag.h`. Each flag is a small data table — no image decoding needed.
+
+**Implementation note:** 16×16 is too small for fine detail. Simplified, recognizable versions are the goal — exact accuracy is not required. Test each flag against the diffused matrix to verify readability.
 
 ---
 

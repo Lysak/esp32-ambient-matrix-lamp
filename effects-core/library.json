@@ -1,0 +1,11 @@
+{
+  "name": "effects-core",
+  "version": "0.1.0",
+  "description": "Portable C++ LED matrix effects engine for ambient-matrix-lamp",
+  "frameworks": ["arduino", "native"],
+  "platforms": ["espressif32", "native"],
+  "build": {
+    "srcDir": "src",
+    "includeDir": "include"
+  }
+}

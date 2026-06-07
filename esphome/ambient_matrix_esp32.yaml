@@ -1,0 +1,17 @@
+substitutions:
+  device_name: ambient-matrix-lamp
+  friendly_name: Ambient Matrix Lamp
+  led_pin: GPIO13        # WS2812B data line (ESP32 GPIO → 470Ω → LED DIN)
+
+packages:
+  board: !include boards/esp32-cp2102.yaml
+  base:  !include common/base.yaml
+  led:   !include common/led_matrix.yaml
+
+esphome:
+  name: ${device_name}
+  friendly_name: ${friendly_name}
+  includes:
+    - custom/adapter.h
+  libraries:
+    - "file://../effects-core"

@@ -1,0 +1,21 @@
+light:
+  - platform: esp32_rmt_led_strip
+    id: led_matrix
+    name: "Ambient Matrix Lamp"
+    pin: ${led_pin}
+    num_leds: 256
+    chipset: WS2812
+    rgb_order: GRB
+    rmt_channel: 0
+    default_transition_length: 0s
+    effects:
+      - addressable_lambda:
+          name: "Rainbow"
+          update_interval: 30ms
+          lambda: |-
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
+            if (initial_run) {
+              engine.set_effect(ambient_matrix::EffectId::Rainbow);
+            }
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
