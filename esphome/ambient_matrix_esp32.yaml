@@ -14,4 +14,6 @@ esphome:
   includes:
     - custom/adapter.h
   libraries:
-    - "file://../effects-core"
+    - effects-core
+  platformio_options:
+    lib_extra_dirs: !secret project_root

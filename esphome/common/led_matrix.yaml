@@ -6,7 +6,6 @@ light:
     num_leds: 256
     chipset: WS2812
     rgb_order: GRB
-    rmt_channel: 0
     default_transition_length: 0s
     effects:
       - addressable_lambda:
@@ -14,8 +13,87 @@ light:
           update_interval: 30ms
           lambda: |-
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
-            if (initial_run) {
-              engine.set_effect(ambient_matrix::EffectId::Rainbow);
-            }
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::Rainbow);
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Color"
+          update_interval: 30ms
+          lambda: |-
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::Color);
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Color Shift"
+          update_interval: 30ms
+          lambda: |-
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::ColorShift);
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Gradient"
+          update_interval: 30ms
+          lambda: |-
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::Gradient);
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Perlin"
+          update_interval: 30ms
+          lambda: |-
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::Perlin);
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Particles"
+          update_interval: 30ms
+          lambda: |-
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::Particles);
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Fire"
+          update_interval: 30ms
+          lambda: |-
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::Fire);
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Fire 2020"
+          update_interval: 30ms
+          lambda: |-
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::Fire2020);
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Confetti"
+          update_interval: 30ms
+          lambda: |-
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::Confetti);
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Tornado"
+          update_interval: 30ms
+          lambda: |-
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::Tornado);
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());

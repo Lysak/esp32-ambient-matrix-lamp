@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include "ambient_matrix/canvas.h"
+#include "ambient_matrix/engine.h"
 
 // Adapts ESPHome AddressableLight to MatrixCanvas.
 // Created per-tick inside the addressable_lambda — zero allocation on the hot path.

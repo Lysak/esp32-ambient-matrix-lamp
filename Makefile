@@ -18,7 +18,7 @@ CORE_SRCS := \
     effects-core/src/effect_confetti.cpp \
     effects-core/src/effect_tornado.cpp
 
-.PHONY: build test preview clean esphome-compile help
+.PHONY: build test preview clean esphome-compile esphome-flash gen-api-key help
 
 help:
 	@echo "build           compile preview + tests"
@@ -26,6 +26,11 @@ help:
 	@echo "preview         run Rainbow effect in terminal (Ctrl+C to stop)"
 	@echo "clean           remove build directory"
 	@echo "esphome-compile validate ESPHome firmware (no device needed)"
+	@echo "esphome-flash   flash via USB (DEVICE=/dev/tty.xxx) or OTA"
+	@echo "gen-api-key     generate a random ESPHome API encryption key"
+
+gen-api-key:
+	@python3 -c "import base64, os; print(base64.b64encode(os.urandom(32)).decode())"
 
 build: $(BUILD_DIR)/preview $(BUILD_DIR)/test_xy_mapping
 
@@ -47,4 +52,7 @@ clean:
 	rm -rf $(BUILD_DIR)
 
 esphome-compile:
-	esphome compile esphome/ambient_matrix_esp32.yaml
+	cd esphome && uvx esphome compile ambient_matrix_esp32.yaml
+
+esphome-flash:
+	cd esphome && uvx esphome run ambient_matrix_esp32.yaml $(if $(DEVICE),--device $(DEVICE),)
