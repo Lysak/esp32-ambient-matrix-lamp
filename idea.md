@@ -65,6 +65,7 @@ This is not intended to be a full 1:1 clone of GyverLamp 2. The goal is to port 
 | Power connector | XT30 or screw terminal | Recommended | Avoid weak small DC jacks if carrying high current |
 | Temperature | DS18B20 or NTC 10K | Recommended | Reduce brightness if inside temperature is too high |
 | Ambient light | BH1750 (I2C) | Recommended | Auto-brightness based on room light level |
+| Ambient light sensor module | GY-30 / BH1750 module | Recommended | Same BH1750 chip in a ready-made I2C board, useful for auto-brightness and ambient-aware effects |
 | Mechanical core | PVC/plumbing pipe | Missing | Original-style inner tube, likely 40 mm |
 | Mechanical cap | Plumbing end cap | Missing | 40 mm cap/plug |
 | Diffusion | White tracing paper / diffuser film | Missing | Not carbon copy paper. Use white tracing paper or LED diffuser film |
