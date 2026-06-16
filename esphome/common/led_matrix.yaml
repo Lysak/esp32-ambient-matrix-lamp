@@ -7,6 +7,9 @@ light:
     chipset: WS2812
     rgb_order: GRB
     default_transition_length: 0s
+    # Hard current cap: strip max is ~15.36A (256 LEDs x 60mA @ full white),
+    # PSU is 5V 12A. Cap to ~5A regardless of HA brightness slider.
+    color_correct: [0.32, 0.32, 0.32]
     effects:
       - addressable_lambda:
           name: "Rainbow"
