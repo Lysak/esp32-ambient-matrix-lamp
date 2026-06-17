@@ -39,39 +39,39 @@ This is not intended to be a full 1:1 clone of GyverLamp 2. The goal is to port 
 ## Hardware already bought / selected
 
 | Category | Component | Status | Notes |
-|---|---:|---:|---|
-| Body | Glass shade / diffuser | Bought | 10×20 cm cylindrical shade |
-| LED | Addressable LED matrix | Bought | 16×16, 256 LEDs, likely WS2812B / NeoPixel-like |
-| Controller | ESP32 DevKit with CP2102 | Bought / ordered | Not ESP32-S3. CP2102 is USB-UART bridge, not the ESP32 model itself |
-| Power supply | 5V 60W PSU | Bought / selected | 5V 12A. Brightness/current must be limited in firmware |
-| Input | Touch button | Bought / selected | Used for on/off, next effect, long press, etc. |
-| Microphone | INMP441 | Bought / selected | I2S digital microphone for sound level / music reactive / clap detection |
-| Audio amplifier | MAX98357A | Bought | I2S DAC + mono Class-D amplifier |
-| Speaker | 3525 4R 3W | Bought | 35×25 mm, 4Ω, 3W speaker |
-| LED protection | Capacitor | Available | 1000 µF 35V, from FPV stack kit. Use near LED power input |
-| Thin cable | Audio cable 2×0.35 mm² | Available | Good for speaker and small signals, not for LED power |
-| Power cable | 18 AWG | Planned / considered | Good for LED power. Approx. 0.82 mm² |
+|---|---|---|---|
+| Controller | ESP32-WROOM-32 DevKit with CP2102 (30P/38P) | Bought | CP2102 is USB-UART bridge. Not ESP32-S3 |
+| LED matrix | WS2812B 16×16 (256 LEDs), 5 V | Bought | Power injection from both ends (VCC + GND wired to start and end of strip) to reduce voltage drop across 256 LEDs |
+| Body | Milky white glass pendant shade | Bought | Cylindrical, ~10×20 cm |
+| Power supply | 5 V 60 W (12 A) AC→DC LED driver | Bought | Brightness/current capped in firmware |
+| Touch button | TTP223 capacitive module (momentary/toggle selectable) | Bought | Firmware expects momentary mode (OUT HIGH while held) |
+| Microphone | INMP441 (or ICS-43434) omnidirectional I²S MEMS | Bought | For sound level, music-reactive, clap detection |
+| Audio amplifier | MAX98357A I²S Class D DAC, 3 W | Bought | |
+| Speaker | 3W 4 Ω mini speaker (35×25 mm) | Bought | |
+| Ambient light sensor | BH1750 / GY-30 I²C module | Bought | For auto-brightness; fade-to-measure approach |
+| LED protection | Capacitor 1000 µF 35 V | Available | From FPV stack kit. Place near LED +5 V input |
+| Thin cable | Audio cable 2×0.35 mm² | Available | Speaker wiring and small signals only, not for LED power |
+| Power cable | 2×4 mm² (≈ 12 AWG), 3 m | Bought | For +5 V / GND to LED matrix |
+| Housing tube | Sewage pipe D50, 250 mm | Bought | Main inner column |
+| Cable pass-through | Sewage pipe D40, 150–200 mm | Bought | |
+| End cap | Plug D40 | Bought | |
+| Sealing | U-channel rubber edging strip | Bought | Seals glass shade to base |
 
 ---
 
 ## Hardware still needed / recommended
 
 | Category | Component | Priority | Notes |
-|---|---:|---:|---|
-| LED data protection | 470Ω resistor | Required | Put in series with LED DATA line, preferably near LED DIN |
-| Logic level shifting | 74AHCT125 / 74HCT245 | Recommended | ESP32 DATA is 3.3V, LED matrix is 5V. Use this for stable WS2812B data |
-| Power protection | Fuse + holder | Recommended | 10A or 15A inline fuse on +5V input |
-| Power wiring | 18 AWG or 0.75–1.5 mm² wire | Required | For +5V/GND to LED matrix |
-| Power connector | XT30 or screw terminal | Recommended | Avoid weak small DC jacks if carrying high current |
-| Temperature | DS18B20 or NTC 10K | Recommended | Reduce brightness if inside temperature is too high |
-| Ambient light | BH1750 (I2C) | Recommended | Auto-brightness based on room light level |
-| Ambient light sensor module | GY-30 / BH1750 module | Recommended | Same BH1750 chip in a ready-made I2C board, useful for auto-brightness and ambient-aware effects |
-| Mechanical core | PVC/plumbing pipe | Missing | Original-style inner tube, likely 40 mm |
-| Mechanical cap | Plumbing end cap | Missing | 40 mm cap/plug |
-| Diffusion | White tracing paper / diffuser film | Missing | Not carbon copy paper. Use white tracing paper or LED diffuser film |
-| Mounting | Heat-shrink, flux, cable ties, standoffs | Needed | For safe internal wiring |
-| Sound openings | Holes/grille in bottom base | Needed | Speaker must not be fully sealed inside the base |
-| Ventilation | Bottom/top airflow holes | Needed | 256 LEDs can generate heat |
+|---|---|---|---|
+| LED data protection | 470 Ω resistor | Required | In series on LED DATA line, near DIN |
+| Logic level shifting | 74AHCT125 / 74HCT245 | Recommended | ESP32 DATA is 3.3 V; LED matrix expects 5 V signal |
+| Power protection | Fuse + holder, 10–15 A | Recommended | Inline on +5 V input |
+| Power connector | XT30 or screw terminal | Recommended | Avoid weak DC jacks at high current |
+| Temperature sensor | DS18B20 or NTC 10K | Recommended | Thermal protection: reduce brightness if overheating |
+| Diffusion | White tracing paper / LED diffuser film | Missing | Not carbon copy paper |
+| Mounting materials | Heat-shrink, flux, cable ties, standoffs | Needed | For safe internal wiring |
+| Sound openings | Holes / grille in bottom base | Needed | Speaker must not be fully sealed |
+| Ventilation | Airflow holes in bottom/top | Needed | 256 LEDs can generate significant heat |
 
 ---
 

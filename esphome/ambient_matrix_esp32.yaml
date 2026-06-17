@@ -1,12 +1,13 @@
 substitutions:
   device_name: ambient-matrix-lamp
   friendly_name: Ambient Matrix Lamp
-  led_pin: GPIO13        # WS2812B data line (ESP32 GPIO → 470Ω → LED DIN)
+  led_pin: GPIO13 # WS2812B DATA: ESP32 P13 / GPIO13 -> 470 Ohm -> LED DIN
+  touch_pin: GPIO27 # TTP223 OUT: ESP32 P27 / GPIO27
 
 packages:
   board: !include boards/esp32-cp2102.yaml
-  base:  !include common/base.yaml
-  led:   !include common/led_matrix.yaml
+  base: !include common/base.yaml
+  led: !include common/led_matrix.yaml
 
 esphome:
   name: ${device_name}
@@ -17,3 +18,11 @@ esphome:
     - effects-core
   platformio_options:
     lib_extra_dirs: !secret project_root
+  # Auto-start on power-up without Home Assistant: Rainbow at 33% brightness.
+  on_boot:
+    priority: -100
+    then:
+      - light.turn_on:
+          id: led_matrix
+          brightness: 33%
+          effect: "Rainbow"

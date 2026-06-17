@@ -14,6 +14,19 @@ globals:
     type: std::string
     restore_value: false
     initial_value: '"Rainbow"'
+  - id: click_count
+    type: uint8_t
+    restore_value: false
+    initial_value: '0'
+  - id: touch_long_press
+    type: bool
+    restore_value: false
+    initial_value: 'false'
+  # Persisted so ramp direction survives reboot.
+  - id: brightness_up
+    type: bool
+    restore_value: true
+    initial_value: 'true'
 
 switch:
   - platform: template
@@ -22,19 +35,24 @@ switch:
     lambda: |-
       return id(lamp_powered);
     turn_on_action:
-      - lambda: |-
-          static const uint32_t DEBOUNCE_MS = 1000;
-          uint32_t now = millis();
-          if (now - id(last_toggle_ms) < DEBOUNCE_MS) return;
-          id(last_toggle_ms) = now;
-          id(lamp_powered) = true;
+      - if:
+          condition:
+            lambda: return millis() - id(last_toggle_ms) >= 1000;
+          then:
+            - lambda: |-
+                id(last_toggle_ms) = millis();
+                id(lamp_powered) = true;
+            - light.turn_on:
+                id: led_matrix
+                effect: !lambda return id(current_effect);
     turn_off_action:
-      - lambda: |-
-          static const uint32_t DEBOUNCE_MS = 1000;
-          uint32_t now = millis();
-          if (now - id(last_toggle_ms) < DEBOUNCE_MS) return;
-          id(last_toggle_ms) = now;
-          id(lamp_powered) = false;
+      - if:
+          condition:
+            lambda: return millis() - id(last_toggle_ms) >= 1000;
+          then:
+            - lambda: |-
+                id(last_toggle_ms) = millis();
+                id(lamp_powered) = false;
 
 select:
   - platform: template
@@ -56,6 +74,7 @@ select:
     set_action:
       - lambda: |-
           id(current_effect) = x;
+          id(lamp_powered) = true;
       - light.turn_on:
           id: led_matrix
           effect: !lambda return x;
@@ -74,6 +93,90 @@ number:
           id: led_matrix
           brightness: !lambda return x / 255.0f;
 
+# Click dispatcher: mode restart means each new tap resets the 800 ms window,
+# matching GyverLamp2's CLICKS_TOUT = 800 logic.
+script:
+  - id: click_handler
+    mode: restart
+    then:
+      - delay: 800ms
+      - if:
+          condition:
+            lambda: return id(click_count) == 1;
+          then:
+            - switch.toggle: lamp_power
+      - if:
+          condition:
+            lambda: return id(click_count) == 2;
+          then:
+            - select.next:
+                id: lamp_effect
+                cycle: true
+      - if:
+          condition:
+            lambda: return id(click_count) == 3;
+          then:
+            - select.previous:
+                id: lamp_effect
+                cycle: true
+      - if:
+          condition:
+            lambda: return id(click_count) >= 4;
+          then:
+            - select.set:
+                id: lamp_effect
+                option: "Rainbow"
+      - lambda: id(click_count) = 0;
+
+binary_sensor:
+  - platform: gpio
+    id: touch_button
+    name: "Lamp Touch Button"
+    # TTP223 OUT -> GPIO27. Touch = HIGH, release = LOW (momentary mode).
+    pin:
+      number: ${touch_pin}
+      mode: INPUT
+    filters:
+      - delayed_on: 30ms
+      - delayed_off: 30ms
+    on_press:
+      - lambda: id(touch_long_press) = false;
+    # Hold threshold matches GyverLamp2 BTN_HOLD = 800 ms.
+    on_hold:
+      min_length: 800ms
+      then:
+        - lambda: id(touch_long_press) = true;
+        # Ramp only when lamp is on, matching GyverLamp2 "if (cfg.state && btn.isHold())".
+        - if:
+            condition:
+              lambda: return id(lamp_powered);
+            then:
+              - while:
+                  condition:
+                    and:
+                      - binary_sensor.is_on: touch_button
+                      - lambda: return id(lamp_powered);
+                  then:
+                    - lambda: |-
+                        float b = id(led_matrix).current_values.get_brightness();
+                        const float step = 5.0f / 255.0f;
+                        b += id(brightness_up) ? step : -step;
+                        if (b > 1.0f) b = 1.0f;
+                        if (b < 1.0f / 255.0f) b = 1.0f / 255.0f;
+                        auto call = id(led_matrix).turn_on();
+                        call.set_brightness(b);
+                        call.perform();
+                    - delay: 80ms
+    on_release:
+      - if:
+          condition:
+            lambda: return !id(touch_long_press);
+          then:
+            - lambda: id(click_count)++;
+            - script.execute: click_handler
+          else:
+            - lambda: id(brightness_up) = !id(brightness_up);
+
 light:
   - platform: esp32_rmt_led_strip
     id: led_matrix
@@ -84,8 +187,8 @@ light:
     chipset: WS2812
     rgb_order: GRB
     default_transition_length: 0s
-    # Hard current cap: strip max is ~15.36A (256 LEDs x 60mA @ full white),
-    # PSU is 5V 12A. Cap to ~5A regardless of HA brightness slider.
+    # Hard current cap: strip max ~15.36A (256 LEDs x 60mA full white),
+    # PSU is 5V 12A. color_correct scales peak draw to ~5A.
     color_correct: [0.32, 0.32, 0.32]
     effects:
       - addressable_lambda:

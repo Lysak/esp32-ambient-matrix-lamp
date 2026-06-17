@@ -6,8 +6,39 @@ Ambient LED matrix lamp powered by ESP32-WROOM (CP2102 USB) and ESPHome.
 
 ## Hardware
 
-- **Board:** ESP32-WROOM-32 with CP2102 USB-to-UART chip
-- **LEDs:** WS2812B strip wired to GPIO13 through a 470 Ω resistor
+Full component list is in [`idea.md`](idea.md) — "Hardware already bought / selected" section.
+
+### Wiring
+
+```
+WS2812B DIN  →  GPIO13 (P13)  via 470 Ω resistor
+WS2812B 5V   →  external 5 V PSU
+WS2812B GND  →  PSU GND  +  ESP32 GND (common ground)
+
+TTP223 VCC   →  3.3 V (ESP32 3V3 pin)
+TTP223 GND   →  GND
+TTP223 OUT   →  GPIO27 (P27)
+```
+
+> **Do not connect 5 V to the ESP32 3V3 pin.** If the ESP32 is powered via USB or VIN/5V, the 3V3 pin outputs regulated 3.3 V — safe for TTP223 VCC.
+
+> **TTP223 mode:** the firmware expects momentary mode — OUT goes HIGH while touched, LOW on release.
+> If the module "latches" (toggle mode), change jumper A/B on the module to switch to momentary.
+
+### Touch button behaviour
+
+Multi-click logic mirrors GyverLamp2 (800 ms window after the last tap):
+
+| Gesture | Action |
+|---|---|
+| 1 tap | Toggle power on / off |
+| 2 taps | Next effect |
+| 3 taps | Previous effect |
+| 4 taps | First effect (Rainbow) |
+| Hold ≥ 800 ms (lamp on) | Ramp brightness ±5/255 every 80 ms |
+| Release after hold | Flip ramp direction for the next hold |
+
+The lamp powers on automatically at boot (Rainbow, 35% brightness) without needing Home Assistant.
 
 ---
 
