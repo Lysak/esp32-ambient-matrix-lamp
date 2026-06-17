@@ -128,6 +128,33 @@ script:
                 option: "Rainbow"
       - lambda: id(click_count) = 0;
 
+  # Replaces on_hold (removed in ESPHome 2026.x): waits 800 ms then ramps brightness.
+  - id: hold_detector
+    mode: single
+    then:
+      - delay: 800ms
+      - lambda: id(touch_long_press) = true;
+      - if:
+          condition:
+            lambda: return id(lamp_powered);
+          then:
+            - while:
+                condition:
+                  and:
+                    - binary_sensor.is_on: touch_button
+                    - lambda: return id(lamp_powered);
+                then:
+                  - lambda: |-
+                      float b = id(led_matrix).current_values.get_brightness();
+                      const float step = 5.0f / 255.0f;
+                      b += id(brightness_up) ? step : -step;
+                      if (b > 1.0f) b = 1.0f;
+                      if (b < 1.0f / 255.0f) b = 1.0f / 255.0f;
+                      auto call = id(led_matrix).turn_on();
+                      call.set_brightness(b);
+                      call.perform();
+                  - delay: 80ms
+
 binary_sensor:
   - platform: gpio
     id: touch_button
@@ -141,33 +168,9 @@ binary_sensor:
       - delayed_off: 30ms
     on_press:
       - lambda: id(touch_long_press) = false;
-    # Hold threshold matches GyverLamp2 BTN_HOLD = 800 ms.
-    on_hold:
-      min_length: 800ms
-      then:
-        - lambda: id(touch_long_press) = true;
-        # Ramp only when lamp is on, matching GyverLamp2 "if (cfg.state && btn.isHold())".
-        - if:
-            condition:
-              lambda: return id(lamp_powered);
-            then:
-              - while:
-                  condition:
-                    and:
-                      - binary_sensor.is_on: touch_button
-                      - lambda: return id(lamp_powered);
-                  then:
-                    - lambda: |-
-                        float b = id(led_matrix).current_values.get_brightness();
-                        const float step = 5.0f / 255.0f;
-                        b += id(brightness_up) ? step : -step;
-                        if (b > 1.0f) b = 1.0f;
-                        if (b < 1.0f / 255.0f) b = 1.0f / 255.0f;
-                        auto call = id(led_matrix).turn_on();
-                        call.set_brightness(b);
-                        call.perform();
-                    - delay: 80ms
+      - script.execute: hold_detector
     on_release:
+      - script.stop: hold_detector
       - if:
           condition:
             lambda: return !id(touch_long_press);

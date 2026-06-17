@@ -1,7 +1,7 @@
 substitutions:
   device_name: ambient-matrix-lamp
   friendly_name: Ambient Matrix Lamp
-  led_pin: GPIO13 # WS2812B DATA: ESP32 P13 / GPIO13 -> 470 Ohm -> LED DIN
+  led_pin: GPIO25 # WS2812B DATA: ESP32 P25 / GPIO25 -> 470 Ohm -> LED DIN
   touch_pin: GPIO27 # TTP223 OUT: ESP32 P27 / GPIO27
 
 packages:
