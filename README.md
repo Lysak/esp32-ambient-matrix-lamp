@@ -102,6 +102,14 @@ Once the device is on Wi-Fi you no longer need the USB cable:
 make esphome-flash
 ```
 
+By default this resolves the device via mDNS (`ambient-matrix-lamp.local`), which can be flaky on some networks. To flash by IP instead, write it to `esphome/.device_ip` (gitignored, local-only):
+
+```bash
+echo "192.168.1.123" > esphome/.device_ip
+```
+
+`make esphome-flash` picks it up automatically; `DEVICE=...` on the command line still overrides it.
+
 ESPHome auto-discovers the device on the local network and uploads over the air.
 
 ---

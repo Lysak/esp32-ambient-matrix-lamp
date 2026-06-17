@@ -51,8 +51,13 @@ preview: $(BUILD_DIR)/preview
 clean:
 	rm -rf $(BUILD_DIR)
 
+# Defaults to the IP saved in esphome/.device_ip (gitignored, local-only) —
+# bypasses mDNS, which has been flaky on this network. Override with
+# DEVICE=<ip-or-hostname> or DEVICE=/dev/tty.xxx for USB.
+DEVICE ?= $(shell cat esphome/.device_ip 2>/dev/null)
+
 esphome-compile:
 	cd esphome && uvx esphome compile ambient_matrix_esp32.yaml
 
 esphome-flash:
-	cd esphome && uvx esphome run ambient_matrix_esp32.yaml $(if $(DEVICE),--device $(DEVICE),)
+	cd esphome && uvx esphome upload ambient_matrix_esp32.yaml $(if $(DEVICE),--device $(DEVICE),)

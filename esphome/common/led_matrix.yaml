@@ -1,7 +1,84 @@
+globals:
+  # Master power flag, independent from the light's effect — mirrors
+  # GyverLamp2's separate "power" vs "preset index" fields, so toggling
+  # power never resets the selected effect.
+  - id: lamp_powered
+    type: bool
+    restore_value: false
+    initial_value: 'true'
+  - id: last_toggle_ms
+    type: uint32_t
+    restore_value: false
+    initial_value: '0'
+  - id: current_effect
+    type: std::string
+    restore_value: false
+    initial_value: '"Rainbow"'
+
+switch:
+  - platform: template
+    id: lamp_power
+    name: "Lamp Power"
+    lambda: |-
+      return id(lamp_powered);
+    turn_on_action:
+      - lambda: |-
+          static const uint32_t DEBOUNCE_MS = 1000;
+          uint32_t now = millis();
+          if (now - id(last_toggle_ms) < DEBOUNCE_MS) return;
+          id(last_toggle_ms) = now;
+          id(lamp_powered) = true;
+    turn_off_action:
+      - lambda: |-
+          static const uint32_t DEBOUNCE_MS = 1000;
+          uint32_t now = millis();
+          if (now - id(last_toggle_ms) < DEBOUNCE_MS) return;
+          id(last_toggle_ms) = now;
+          id(lamp_powered) = false;
+
+select:
+  - platform: template
+    id: lamp_effect
+    name: "Lamp Effect"
+    options:
+      - "Rainbow"
+      - "Color"
+      - "Color Shift"
+      - "Gradient"
+      - "Perlin"
+      - "Particles"
+      - "Fire"
+      - "Fire 2020"
+      - "Confetti"
+      - "Tornado"
+    lambda: |-
+      return id(current_effect);
+    set_action:
+      - lambda: |-
+          id(current_effect) = x;
+      - light.turn_on:
+          id: led_matrix
+          effect: !lambda return x;
+
+number:
+  - platform: template
+    id: lamp_brightness
+    name: "Lamp Brightness"
+    min_value: 1
+    max_value: 255
+    step: 1
+    lambda: |-
+      return (int)(id(led_matrix).current_values.get_brightness() * 255.0f);
+    set_action:
+      - light.turn_on:
+          id: led_matrix
+          brightness: !lambda return x / 255.0f;
+
 light:
   - platform: esp32_rmt_led_strip
     id: led_matrix
     name: "Ambient Matrix Lamp"
+    internal: true
     pin: ${led_pin}
     num_leds: 256
     chipset: WS2812
@@ -15,6 +92,7 @@ light:
           name: "Rainbow"
           update_interval: 30ms
           lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::Rainbow);
             ESPHomeMatrixCanvas canvas(it);
@@ -24,6 +102,7 @@ light:
           name: "Color"
           update_interval: 30ms
           lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::Color);
             ESPHomeMatrixCanvas canvas(it);
@@ -33,6 +112,7 @@ light:
           name: "Color Shift"
           update_interval: 30ms
           lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::ColorShift);
             ESPHomeMatrixCanvas canvas(it);
@@ -42,6 +122,7 @@ light:
           name: "Gradient"
           update_interval: 30ms
           lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::Gradient);
             ESPHomeMatrixCanvas canvas(it);
@@ -51,6 +132,7 @@ light:
           name: "Perlin"
           update_interval: 30ms
           lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::Perlin);
             ESPHomeMatrixCanvas canvas(it);
@@ -60,6 +142,7 @@ light:
           name: "Particles"
           update_interval: 30ms
           lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::Particles);
             ESPHomeMatrixCanvas canvas(it);
@@ -69,6 +152,7 @@ light:
           name: "Fire"
           update_interval: 30ms
           lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::Fire);
             ESPHomeMatrixCanvas canvas(it);
@@ -78,6 +162,7 @@ light:
           name: "Fire 2020"
           update_interval: 30ms
           lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::Fire2020);
             ESPHomeMatrixCanvas canvas(it);
@@ -87,6 +172,7 @@ light:
           name: "Confetti"
           update_interval: 30ms
           lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::Confetti);
             ESPHomeMatrixCanvas canvas(it);
@@ -96,6 +182,7 @@ light:
           name: "Tornado"
           update_interval: 30ms
           lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::Tornado);
             ESPHomeMatrixCanvas canvas(it);
