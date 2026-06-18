@@ -1,13 +1,16 @@
 substitutions:
   device_name: ambient-matrix-lamp
   friendly_name: Ambient Matrix Lamp
-  led_pin: GPIO25 # WS2812B DATA: ESP32 P25 / GPIO25 -> 470 Ohm -> LED DIN
-  touch_pin: GPIO27 # TTP223 OUT: ESP32 P27 / GPIO27
+  led_pin: GPIO25   # WS2812B DATA: ESP32 GPIO25 → 470 Ω → LED DIN
+  touch_pin: GPIO27 # TTP223 OUT:   ESP32 GPIO27
+  i2c_sda: GPIO21   # BH1750 SDA:   ESP32 GPIO21 (I²C default)
+  i2c_scl: GPIO22   # BH1750 SCL:   ESP32 GPIO22 (I²C default)
 
 packages:
   board: !include boards/esp32-cp2102.yaml
   base: !include common/base.yaml
   led: !include common/led_matrix.yaml
+  light_sensor: !include common/light_sensor.yaml  # BH1750 — comment out to disable
 
 esphome:
   name: ${device_name}

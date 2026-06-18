@@ -1,0 +1,230 @@
+# BH1750 / GY-30 ambient light sensor — lux reading + auto-brightness.
+#
+# To disable: comment out `light_sensor` in the packages block of the main YAML.
+# To swap sensor model: change `platform:` and `address:` in the sensor block below.
+#   BH1750 addresses: 0x23 (ADDR low, default) or 0x5C (ADDR high).
+# To change I²C pins: edit `i2c_sda` / `i2c_scl` substitutions in the main YAML.
+#
+# Tunable defaults (adjust here, then recompile):
+#   lux_min  —  lux level mapped to minimum brightness (dark room / night)
+#   lux_max  —  lux level mapped to maximum brightness (bright room / daylight)
+#   BRIGHTNESS_MIN  —  0.08  (8 %,  ~20/255) — lamp never fully disappears
+#   BRIGHTNESS_MAX  —  1.00  (100 %)
+#   measure_interval  —  how often an ambient reading is taken (see `interval:` below)
+
+i2c:
+  sda: ${i2c_sda}
+  scl: ${i2c_scl}
+  scan: false
+
+globals:
+  # Last measured ambient lux value; updated every measurement cycle.
+  - id: ambient_lux
+    type: float
+    restore_value: false
+    initial_value: '0.0'
+
+  # Whether auto-brightness is active; persisted across reboots.
+  - id: auto_brightness_on
+    type: bool
+    restore_value: true
+    initial_value: 'true'
+
+  # Calibration range — lux values for minimum and maximum brightness.
+  # Persisted so they survive reboot and can be tuned from HA without reflash.
+  - id: lux_cal_min
+    type: float
+    restore_value: true
+    initial_value: '5.0'    # change to suit your darkest normal condition
+
+  - id: lux_cal_max
+    type: float
+    restore_value: true
+    initial_value: '400.0'  # change to suit your brightest normal condition
+
+  # Saved brightness before a fade-to-measure cycle; used to restore when
+  # auto-brightness is off (when auto is on, apply_auto_brightness restores it).
+  - id: pre_measure_brightness
+    type: float
+    restore_value: false
+    initial_value: '0.33'
+
+# ── sensor ────────────────────────────────────────────────────────────────────
+
+sensor:
+  - platform: bh1750
+    id: bh1750_sensor
+    name: "Ambient Light"
+    address: 0x23          # swap to 0x5C if ADDR pin is tied HIGH
+    update_interval: never # driven manually by measure_ambient_lux script
+    on_value:
+      - lambda: id(ambient_lux) = x;
+      - script.execute: apply_auto_brightness
+
+# ── HA controls ───────────────────────────────────────────────────────────────
+
+switch:
+  - platform: template
+    id: auto_brightness_switch
+    name: "Auto Brightness"
+    icon: "mdi:brightness-auto"
+    lambda: return id(auto_brightness_on);
+    turn_on_action:
+      - lambda: id(auto_brightness_on) = true;
+      # Apply immediately using the last known lux reading.
+      - script.execute: apply_auto_brightness
+    turn_off_action:
+      - lambda: id(auto_brightness_on) = false;
+
+number:
+  # Lower calibration bound: lux at which brightness is at BRIGHTNESS_MIN.
+  - platform: template
+    id: lux_min_number
+    name: "Auto-brightness Lux Min"
+    icon: "mdi:brightness-3"
+    unit_of_measurement: "lx"
+    min_value: 0
+    max_value: 500
+    step: 1
+    lambda: return id(lux_cal_min);
+    set_action:
+      - lambda: id(lux_cal_min) = x;
+
+  # Upper calibration bound: lux at which brightness reaches BRIGHTNESS_MAX.
+  - platform: template
+    id: lux_max_number
+    name: "Auto-brightness Lux Max"
+    icon: "mdi:brightness-7"
+    unit_of_measurement: "lx"
+    min_value: 10
+    max_value: 10000
+    step: 10
+    lambda: return id(lux_cal_max);
+    set_action:
+      - lambda: id(lux_cal_max) = x;
+
+# ── calibration buttons ───────────────────────────────────────────────────────
+#
+# Calibration workflow (no reflash needed):
+#   1. Press "Measure Now" and note the lux value in sensor.ambient_light.
+#   2. Make the room as dark as it normally gets (night, lights off).
+#      Press "Calibrate: Set Dark" — lamp fades, reads, saves as lux_min.
+#   3. Make the room as bright as it normally gets (daylight, all lights on).
+#      Press "Calibrate: Set Bright" — lamp fades, reads, saves as lux_max.
+#   Done. Auto-brightness now matches this room and the frosted glass attenuation.
+#
+# The saved values are visible in number.auto_brightness_lux_min / lux_max in HA
+# and survive reboots. Fine-tune them manually if needed via those number sliders.
+
+button:
+  - platform: template
+    id: btn_measure_now
+    name: "Measure Now"
+    icon: "mdi:eye"
+    on_press:
+      - script.execute: measure_ambient_lux
+
+  - platform: template
+    id: btn_calibrate_dark
+    name: "Calibrate: Set Dark"
+    icon: "mdi:brightness-3"
+    on_press:
+      - script.execute: calibrate_lux_min
+
+  - platform: template
+    id: btn_calibrate_bright
+    name: "Calibrate: Set Bright"
+    icon: "mdi:brightness-7"
+    on_press:
+      - script.execute: calibrate_lux_max
+
+# ── scripts ───────────────────────────────────────────────────────────────────
+
+script:
+  # Fade-to-measure: briefly dims the lamp, reads ambient lux, then restores.
+  # When lamp is off, reads directly without any fading.
+  # mode: single — concurrent calls are dropped (safe to call from interval).
+  - id: measure_ambient_lux
+    mode: single
+    then:
+      - if:
+          condition:
+            lambda: return id(lamp_powered);
+          then:
+            # Save current brightness before we touch it.
+            - lambda: |-
+                id(pre_measure_brightness) =
+                    id(led_matrix).current_values.get_brightness();
+            # Fade to near-zero so the sensor sees only ambient light.
+            - light.turn_on:
+                id: led_matrix
+                brightness: 1%
+                transition_length: 1s
+            # Wait for the fade to complete + a short sensor settle time.
+            - delay: 1200ms
+            # Trigger a one-shot I²C read; on_value fires synchronously.
+            - component.update: bh1750_sensor
+            # Small buffer — on_value + apply_auto_brightness finish first.
+            - delay: 150ms
+            # Restore saved brightness only if auto-brightness is off;
+            # when it is on, apply_auto_brightness already restored the lamp.
+            - if:
+                condition:
+                  lambda: return !id(auto_brightness_on);
+                then:
+                  - light.turn_on:
+                      id: led_matrix
+                      brightness: !lambda return id(pre_measure_brightness);
+                      transition_length: 800ms
+          else:
+            # Lamp is off — read ambient directly, no fading needed.
+            - component.update: bh1750_sensor
+
+  # Compute and apply brightness from the last lux reading.
+  # Called automatically by on_value; can also be called manually.
+  - id: apply_auto_brightness
+    mode: single
+    then:
+      - if:
+          condition:
+            lambda: return id(auto_brightness_on) && id(lamp_powered);
+          then:
+            - lambda: |-
+                const float lux     = id(ambient_lux);
+                const float lux_min = id(lux_cal_min);
+                const float lux_max = id(lux_cal_max);
+                // Linear interpolation, clamped to [0, 1].
+                float ratio = (lux - lux_min) / (lux_max - lux_min);
+                if (ratio < 0.0f) ratio = 0.0f;
+                if (ratio > 1.0f) ratio = 1.0f;
+                // Map to brightness range: 8 % (dark) … 100 % (bright).
+                const float brightness = 0.08f + ratio * 0.92f;
+                auto call = id(led_matrix).turn_on();
+                call.set_brightness(brightness);
+                call.set_transition_length(800u);
+                call.perform();
+
+  # Calibration helpers — trigger a fresh measurement, then save the result.
+  # script.wait blocks until measure_ambient_lux finishes (including the fade).
+  - id: calibrate_lux_min
+    mode: single
+    then:
+      - script.execute: measure_ambient_lux
+      - script.wait: measure_ambient_lux
+      - lambda: id(lux_cal_min) = id(ambient_lux);
+
+  - id: calibrate_lux_max
+    mode: single
+    then:
+      - script.execute: measure_ambient_lux
+      - script.wait: measure_ambient_lux
+      - lambda: id(lux_cal_max) = id(ambient_lux);
+
+# ── measurement interval ──────────────────────────────────────────────────────
+
+interval:
+  # Take an ambient lux reading every 5 minutes.
+  # Change the value here to tune the polling rate.
+  - interval: 5min
+    then:
+      - script.execute: measure_ambient_lux
