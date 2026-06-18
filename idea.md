@@ -528,13 +528,94 @@ Flag definitions stored as const structs in `effects-core/include/ambient_matrix
 
 ### Microphone
 
-INMP441 is for:
+#### Hardware
 
-1. Music reactive modes.
-2. Sound level visualization.
-3. Possible clap detection.
+INMP441 (or ICS-43434) — omnidirectional I²S MEMS microphone, 3.3 V, standard Philips I²S output, 24-bit data.
 
-Voice assistant / wake word is not the primary goal for the current ESP32 CP2102 board. That would be better for a future ESP32-S3 with PSRAM.
+#### Use cases
+
+1. Sound level visualization (sensor exposed to Home Assistant).
+2. Clap detection → lamp control actions.
+3. Music-reactive effects (Phase 6+).
+4. Song-change detection (Phase 6+).
+
+Voice assistant / wake word is not a goal for the current ESP32-WROOM-32 CP2102 board.
+That would better suit a future ESP32-S3 with PSRAM.
+
+#### Wiring (ESP32 GPIO assignments)
+
+| INMP441 pin | ESP32 GPIO | Notes |
+|---|---|---|
+| VDD | 3.3 V | Do NOT connect to 5 V |
+| GND | GND | Common ground |
+| SCK | GPIO32 | Bit clock |
+| WS | GPIO33 | Word select (LRCLK) |
+| SD | GPIO34 | Serial data — input-only GPIO, ideal for mic |
+| L/R | GND | Selects left channel (I²S address 0) |
+
+Pins are defined as substitution variables in `esphome/ambient_matrix_esp32.yaml`
+(`mic_sck`, `mic_ws`, `mic_sd`) and can be changed without touching C++ code.
+
+#### Firmware files
+
+| File | Role |
+|---|---|
+| `effects-core/include/ambient_matrix/mic/vol_analyzer.h` | Portable C++ volume analyzer — window-max + dynamic range + exponential smoothing. Adapted from `VolAnalyzer.h` in GyverLamp2. |
+| `effects-core/include/ambient_matrix/mic/clap_detector.h` | Portable C++ clap counter — derivative edge-detection state machine. Direct port of `Clap.h` from GyverLamp2. |
+| `esphome/custom/mic_reader.h` | ESP32-specific I²S reader. Sets up `driver/i2s_std.h` (ESP-IDF 5.x API), drains DMA in `tick()`, feeds VolAnalyzer + ClapDetector. |
+| `esphome/common/microphone.yaml` | ESPHome package — sensor, switch, tuning numbers, 10 ms interval loop. |
+
+#### How to disable
+
+**Full disable** (removes HA entities, no I²S init, no CPU overhead):
+
+```yaml
+# esphome/ambient_matrix_esp32.yaml — comment out this line:
+mic: !include common/microphone.yaml   # INMP441 — comment out to disable
+```
+
+**C++ only** (HA entities remain but read 0, I²S driver is never started):
+
+```cpp
+// esphome/custom/mic_reader.h — comment out this line:
+#define LAMP_MIC_ENABLED
+```
+
+When `LAMP_MIC_ENABLED` is not defined, all `MicReader` methods become
+no-op stubs — zero overhead, no I²S includes, clean compile.
+
+#### How to swap the microphone
+
+1. Change `mic_sck` / `mic_ws` / `mic_sd` in `ambient_matrix_esp32.yaml`
+   to match the new hardware wiring.
+2. If the replacement uses a different I²S format (e.g. PDM mic):
+   update `MicReader::begin()` in `custom/mic_reader.h` — replace
+   `i2s_channel_init_std_mode` with `i2s_channel_init_pdm_rx_mode`
+   and adjust the slot/clock config.
+3. If sensitivity is off: tune `clap_threshold` via
+   `number.lamp_clap_threshold` in Home Assistant (persisted across reboots).
+
+#### Clap detection defaults
+
+| Parameter | Default | HA entity |
+|---|---|---|
+| Derivative threshold | 3000 | `number.lamp_clap_threshold` |
+| Burst window | 500 ms | `number.lamp_clap_timeout` |
+
+Defaults match the GyverLamp2 Clap.h proportional values, scaled for
+the INMP441 24-bit range.  Stored in ESPHome `globals` (flash-persisted)
+so tuning survives reboots without reflashing.
+
+#### Default clap actions (same mapping as GyverLamp2)
+
+| Claps | Action |
+|---|---|
+| 1 | Toggle lamp on / off |
+| 2 | Next effect |
+| 3 | Previous effect |
+
+Clap detection can be disabled at runtime via `switch.lamp_clap_detection`
+in Home Assistant without reflashing.
 
 ### Sunrise alarm
 

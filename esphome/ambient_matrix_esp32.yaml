@@ -5,12 +5,18 @@ substitutions:
   touch_pin: GPIO27 # TTP223 OUT:   ESP32 GPIO27
   i2c_sda: GPIO21   # BH1750 SDA:   ESP32 GPIO21 (I²C default)
   i2c_scl: GPIO22   # BH1750 SCL:   ESP32 GPIO22 (I²C default)
+  # INMP441 I²S microphone (integer GPIO numbers required by ESP-IDF I²S driver)
+  mic_sck: "32"     # INMP441 SCK:  ESP32 GPIO32
+  mic_ws: "33"      # INMP441 WS:   ESP32 GPIO33
+  mic_sd: "34"      # INMP441 SD:   ESP32 GPIO34 (input-only GPIO)
+  # L/R pin → GND (selects left channel / address 0)
 
 packages:
   board: !include boards/esp32-cp2102.yaml
   base: !include common/base.yaml
   led: !include common/led_matrix.yaml
   light_sensor: !include common/light_sensor.yaml  # BH1750 — comment out to disable
+  mic: !include common/microphone.yaml              # INMP441 — comment out to disable
 
 esphome:
   name: ${device_name}

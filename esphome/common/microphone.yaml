@@ -1,0 +1,137 @@
+# INMP441 I²S MEMS microphone subsystem.
+# Provides: sound level sensor, clap detection → lamp actions.
+#
+# ── How to disable ──────────────────────────────────────────────────────────
+#   Full disable (removes HA entities too):
+#     comment out  mic: !include common/microphone.yaml  in ambient_matrix_esp32.yaml
+#   C++ only (entities stay in HA but read 0, no I²S init):
+#     comment out  #define LAMP_MIC_ENABLED  in custom/mic_reader.h
+#
+# ── How to swap the microphone ──────────────────────────────────────────────
+#   1. Change mic_sck / mic_ws / mic_sd substitutions in ambient_matrix_esp32.yaml.
+#   2. If the replacement uses a different I²S format (e.g. PDM), update
+#      MicReader::begin() in custom/mic_reader.h (communication_format field).
+#
+# ── Tuning clap sensitivity ──────────────────────────────────────────────────
+#   Edit  clap_threshold / clap_timeout_ms  globals below (or from HA via
+#   number.lamp_clap_threshold / number.lamp_clap_timeout); values are
+#   persisted and applied at next boot without reflashing.
+
+# Pulls in the MicReader C++ class (only active when this package is included).
+esphome:
+  includes:
+    - custom/mic_reader.h
+
+# ── globals ───────────────────────────────────────────────────────────────────
+
+globals:
+  - id: clap_detect_on
+    type: bool
+    restore_value: true
+    initial_value: 'true'
+
+  # Derivative threshold on amplitude signal.  Higher → less sensitive.
+  # Start at 3000 and tune for your room.  Persisted across reboots.
+  - id: clap_threshold
+    type: uint32_t
+    restore_value: true
+    initial_value: '3000'
+
+  # Burst window: ms to wait for more claps before reporting the count.
+  - id: clap_timeout_ms
+    type: uint32_t
+    restore_value: true
+    initial_value: '500'
+
+# ── HA entities ───────────────────────────────────────────────────────────────
+
+sensor:
+  - platform: template
+    id: lamp_sound_level
+    name: "Lamp Sound Level"
+    icon: "mdi:microphone"
+    unit_of_measurement: "%"
+    accuracy_decimals: 0
+    update_interval: never   # driven by the 10 ms interval below
+
+switch:
+  - platform: template
+    id: lamp_clap_detection
+    name: "Lamp Clap Detection"
+    icon: "mdi:hand-clap"
+    lambda: return id(clap_detect_on);
+    turn_on_action:
+      - lambda: id(clap_detect_on) = true;
+    turn_off_action:
+      - lambda: id(clap_detect_on) = false;
+
+number:
+  # Changes are persisted and take effect at next reboot.
+  - platform: template
+    id: lamp_clap_threshold
+    name: "Lamp Clap Threshold"
+    icon: "mdi:tune-variant"
+    unit_of_measurement: ""
+    min_value: 500
+    max_value: 20000
+    step: 500
+    lambda: return (float)id(clap_threshold);
+    set_action:
+      - lambda: id(clap_threshold) = (uint32_t)x;
+
+  - platform: template
+    id: lamp_clap_timeout
+    name: "Lamp Clap Burst Window"
+    icon: "mdi:timer-outline"
+    unit_of_measurement: "ms"
+    min_value: 300
+    max_value: 1000
+    step: 50
+    lambda: return (float)id(clap_timeout_ms);
+    set_action:
+      - lambda: id(clap_timeout_ms) = (uint32_t)x;
+
+# ── microphone loop ───────────────────────────────────────────────────────────
+
+interval:
+  # 10 ms — matches GyverLamp2 Clap.h tick rate; runs on the main loop thread.
+  - interval: 10ms
+    then:
+      - lambda: |-
+          static MicReader mic;
+          static bool      initialized = false;
+          static uint8_t   pub_cnt     = 0;
+
+          if (!initialized) {
+            initialized = true;
+            mic.begin(${mic_sck}, ${mic_ws}, ${mic_sd});
+            // Apply persisted tuning parameters from globals.
+            // (MicReader exposes setThreshold / setTimeout on its ClapDetector.)
+            mic.setThreshold(id(clap_threshold));
+            mic.setTimeout(id(clap_timeout_ms));
+          }
+
+          mic.tick(millis());
+
+          // Publish sound level every 200 ms (every 20th tick).
+          if (++pub_cnt >= 20) {
+            pub_cnt = 0;
+            id(lamp_sound_level).publish_state(mic.vol());
+          }
+
+          // Clap actions — same mapping as GyverLamp2 button.ino defaults.
+          if (!id(clap_detect_on)) return;
+          uint8_t c = mic.getClaps();
+          if (c == 0) return;
+
+          if (c == 1) {
+            id(lamp_power).toggle();
+          } else if (c == 2) {
+            auto call = id(lamp_effect).make_call();
+            call.select_next(true);
+            call.perform();
+          } else if (c == 3) {
+            auto call = id(lamp_effect).make_call();
+            call.select_previous(true);
+            call.perform();
+          }
