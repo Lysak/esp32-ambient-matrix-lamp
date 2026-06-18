@@ -10,6 +10,10 @@ substitutions:
   mic_ws: "33"      # INMP441 WS:   ESP32 GPIO33
   mic_sd: "34"      # INMP441 SD:   ESP32 GPIO34 (input-only GPIO)
   # L/R pin → GND (selects left channel / address 0)
+  # MAX98357A I²S speaker amplifier
+  spk_lrclk: GPIO13 # MAX98357A LRC:  ESP32 GPIO13
+  spk_bclk: GPIO26  # MAX98357A BCLK: ESP32 GPIO26
+  spk_dout: GPIO14  # MAX98357A DIN:  ESP32 GPIO14
 
 packages:
   board: !include boards/esp32-cp2102.yaml
@@ -17,6 +21,7 @@ packages:
   led: !include common/led_matrix.yaml
   light_sensor: !include common/light_sensor.yaml  # BH1750 — comment out to disable
   mic: !include common/microphone.yaml              # INMP441 — comment out to disable
+  audio: !include common/audio.yaml                 # MAX98357A — comment out to disable
 
 esphome:
   name: ${device_name}

@@ -3,3 +3,4 @@ build/
 .esphome/
 esphome/secrets.yaml
 esphome/.device_ip
+.DS_Store

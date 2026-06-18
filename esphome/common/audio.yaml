@@ -1,0 +1,55 @@
+# MAX98357A I²S Class D amplifier + speaker.
+# Provides: media_player.lamp_speaker for Home Assistant audio notifications.
+#
+# ── How to disable ──────────────────────────────────────────────────────────
+#   Comment out  audio: !include common/audio.yaml  in ambient_matrix_esp32.yaml.
+#   No entities are registered, no I²S bus is allocated — zero overhead.
+#
+# ── How to swap the amplifier ────────────────────────────────────────────────
+#   Change spk_bclk / spk_lrclk / spk_dout substitutions in
+#   ambient_matrix_esp32.yaml to match the new hardware wiring.
+#
+#   If the replacement uses a different protocol:
+#     - Analog amp (e.g. PAM8403): needs a separate I2S DAC before it —
+#       not a direct drop-in for MAX98357A.
+#     - Internal ESP32 DAC: replace speaker dac_type with internal,
+#       remove i2s_dout_pin; ESP32 internal DAC is on GPIO25 / GPIO26, but
+#       GPIO25 is used for LED matrix in this project — not a viable swap.
+#
+#   MAX98357A SD_MODE pin: tie to 3.3 V for always-on (12 dB gain).
+#   For firmware-controlled mute, wire SD_MODE to a free GPIO and add
+#   a gpio switch entity here.
+#
+# ── Wiring ───────────────────────────────────────────────────────────────────
+#   MAX98357A LRC  → spk_lrclk (${spk_lrclk})
+#   MAX98357A BCLK → spk_bclk  (${spk_bclk})
+#   MAX98357A DIN  → spk_dout  (${spk_dout})
+#   MAX98357A GND  → GND (common with ESP32 and LED PSU)
+#   MAX98357A VIN  → 5 V
+#   MAX98357A OUT+ → speaker +
+#   MAX98357A OUT- → speaker -
+#   MAX98357A SD_MODE → 3.3 V
+
+i2s_audio:
+  - id: i2s_out
+    i2s_lrclk_pin: ${spk_lrclk}
+    i2s_bclk_pin: ${spk_bclk}
+
+speaker:
+  - platform: i2s_audio
+    id: lamp_speaker_output
+    i2s_audio_id: i2s_out
+    dac_type: external
+    i2s_dout_pin: ${spk_dout}
+
+media_player:
+  - platform: speaker
+    id: lamp_speaker
+    name: "Lamp Speaker"
+    icon: "mdi:speaker"
+    # Single pipeline covers both announcements (TTS, short sounds) and streaming.
+    # 44100 Hz mono — standard for MP3 notification sounds.
+    announcement_pipeline:
+      speaker: lamp_speaker_output
+      num_channels: 1
+      sample_rate: 44100
