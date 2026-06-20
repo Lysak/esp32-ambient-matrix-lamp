@@ -39,9 +39,9 @@ void EffectFire2020::tick(MatrixCanvas& canvas, const Matrix& matrix,
         for (uint8_t y = 0; y < h; y++) {
             uint8_t j     = h - 1 - y;                // noise row: 0=top, h-1=bottom
             uint8_t shift = (uint8_t)((uint16_t)y * 255 / (h > 1 ? h - 1 : 1));
-            uint8_t n     = inoise8((uint16_t)x * delta_value_,
-                                    ((uint16_t)j + ff_y_ + random8(2)) * delta_hue_,
-                                    ff_z_);
+            uint8_t n     = cylindrical_noise8(x, (uint8_t)j, w,
+                                               delta_value_,
+                                               (uint16_t)(ff_z_ + ff_y_ * delta_hue_));
             uint8_t idx = qsub8(n, shift);
             canvas.set_pixel(matrix.xy(x, y), color_from_palette(kRainbowColors, idx, 255));
         }
@@ -58,8 +58,9 @@ void EffectFire2020::tick(MatrixCanvas& canvas, const Matrix& matrix,
         if (sy > 3 && sy < h) {
             // Recompute the flame color at row y=3, same column
             uint8_t j3   = h - 1 - 3;
-            uint8_t n3   = inoise8((uint16_t)sx * delta_value_,
-                                   ((uint16_t)j3 + ff_y_) * delta_hue_, ff_z_);
+            uint8_t n3   = cylindrical_noise8(sx, (uint8_t)j3, w,
+                                              delta_value_,
+                                              (uint16_t)(ff_z_ + ff_y_ * delta_hue_));
             uint8_t sh3  = (uint8_t)((uint16_t)3 * 255 / (h > 1 ? h - 1 : 1));
             uint8_t idx3 = qsub8(n3, sh3);
             uint8_t fade = (sy > 127) ? 255u : (uint8_t)(sy * 2u);

@@ -16,5 +16,6 @@ extern const Palette16 kRainbowColors;
 extern const Palette16 kOceanColors;
 extern const Palette16 kForestColors;
 extern const Palette16 kLavaColors;
+extern const Palette16 kCampfireColors;
 
 } // namespace ambient_matrix

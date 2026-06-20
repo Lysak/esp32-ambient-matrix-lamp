@@ -21,7 +21,8 @@ void EffectRainbow::tick(MatrixCanvas& canvas, const Matrix& matrix,
 
     for (uint8_t y = 0; y < matrix.height(); y++) {
         for (uint8_t x = 0; x < matrix.width(); x++) {
-            uint8_t hue = (uint8_t)((x + y) * spread) + hue_offset_;
+            uint8_t hue = (uint8_t)((uint16_t)x * 256 / matrix.width()
+                          + (uint16_t)y * spread / matrix.height()) + hue_offset_;
             canvas.set_pixel(matrix.xy(x, y), Rgb::from_hsv(hue, 255, 255));
         }
     }

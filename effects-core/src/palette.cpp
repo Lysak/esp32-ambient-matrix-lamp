@@ -68,4 +68,12 @@ const Palette16 kLavaColors = {{
     {255,210, 40}, {255,235,100}, {255,245,180}, {255,255,255},
 }};
 
+// Ember black -> deep red -> orange -> warm yellow, without cold white.
+const Palette16 kCampfireColors = {{
+    {  0,  0,  0}, {  2,  0,  0}, {  7,  0,  0}, { 16,  0,  0},
+    { 32,  1,  0}, { 55,  2,  0}, { 82,  4,  0}, {118,  8,  0},
+    {158, 15,  0}, {198, 28,  0}, {232, 48,  0}, {250, 75,  0},
+    {255,110,  2}, {255,150, 10}, {255,195, 42}, {255,230,110},
+}};
+
 } // namespace ambient_matrix

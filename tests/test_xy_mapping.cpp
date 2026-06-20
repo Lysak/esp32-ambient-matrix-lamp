@@ -51,6 +51,15 @@ static void test_all_indices_in_bounds_16x16() {
     }
 }
 
+static void test_cylindrical_x_wrap() {
+    Matrix m(16, 16);
+    assert(m.wrap_x(-1) == 15);
+    assert(m.wrap_x(16) == 0);
+    assert(m.xy_wrap(-1, 0) == m.xy(15, 0));
+    assert(m.xy_wrap(16, 1) == m.xy(0, 1));
+    assert(m.shortest_x_delta(15.0f, 0.0f) == -1.0f);
+}
+
 int main() {
     test_bottom_left_is_index_zero();
     test_row0_left_to_right();
@@ -58,6 +67,7 @@ int main() {
     test_row2_left_to_right_again();
     test_all_indices_unique_4x4();
     test_all_indices_in_bounds_16x16();
+    test_cylindrical_x_wrap();
     printf("all tests passed\n");
     return 0;
 }

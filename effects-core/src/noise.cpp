@@ -3,6 +3,7 @@
 // Reference: https://mrl.cs.nyu.edu/~perlin/noise/
 
 #include "ambient_matrix/noise.h"
+#include <cmath>
 
 namespace ambient_matrix {
 
@@ -67,6 +68,36 @@ uint8_t inoise8(uint16_t x, uint16_t y, uint16_t z) {
 
 uint16_t inoise16(uint32_t x, uint32_t y, uint32_t z) {
     return (uint16_t)inoise8((uint16_t)(x >> 8), (uint16_t)(y >> 8), (uint16_t)(z >> 8)) << 8;
+}
+
+uint8_t cylindrical_noise8(uint8_t x, uint8_t y, uint8_t width,
+                           uint16_t spatial_scale, uint16_t time) {
+    if (width == 0) return 0;
+    int32_t circle_x;
+    int32_t circle_y;
+    const int32_t radius = (int32_t)spatial_scale * width * 41 / 256;
+
+    if (width == 16) {
+        static constexpr int16_t kCos16[16] = {
+             32767,  30273,  23170,  12539,      0, -12539, -23170, -30273,
+            -32767, -30273, -23170, -12539,      0,  12539,  23170,  30273,
+        };
+        static constexpr int16_t kSin16[16] = {
+                 0,  12539,  23170,  30273,  32767,  30273,  23170,  12539,
+                 0, -12539, -23170, -30273, -32767, -30273, -23170, -12539,
+        };
+        circle_x = (int32_t)kCos16[x & 0x0F] * radius >> 15;
+        circle_y = (int32_t)kSin16[x & 0x0F] * radius >> 15;
+    } else {
+        static constexpr float kTau = 6.28318531f;
+        const float angle = kTau * x / width;
+        circle_x = (int32_t)(std::cos(angle) * radius);
+        circle_y = (int32_t)(std::sin(angle) * radius);
+    }
+
+    const int32_t nx = 32768 + circle_x + (int32_t)y * spatial_scale / 2;
+    const int32_t ny = 32768 + circle_y + (int32_t)y * spatial_scale;
+    return inoise8((uint16_t)nx, (uint16_t)ny, time);
 }
 
 } // namespace ambient_matrix

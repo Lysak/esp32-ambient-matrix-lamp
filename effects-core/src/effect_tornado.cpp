@@ -32,10 +32,8 @@ void EffectTornado::tick(MatrixCanvas& canvas, const Matrix& matrix,
                 Rgb c = color_from_palette(kRainbowColors, hue_idx, bright);
 
                 auto place = [&](int16_t cx) {
-                    if (cx >= 0 && cx < (int16_t)w) {
-                        Rgb& px = buf[matrix.xy((uint8_t)cx, y)];
-                        px = add_rgb(px, c);
-                    }
+                    Rgb& px = buf[matrix.xy_wrap(cx, y)];
+                    px = add_rgb(px, c);
                 };
                 if (j == 0) {
                     place(col);

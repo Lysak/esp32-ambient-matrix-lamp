@@ -39,8 +39,8 @@ void EffectParticles::tick(MatrixCanvas& canvas, const Matrix& matrix,
         int16_t px = hx + ox;
         int16_t py = hy + oy;
 
-        if (px >= 0 && px < (int16_t)h && py >= 0 && py < (int16_t)w) {
-            uint16_t idx = matrix.xy((uint8_t)py, (uint8_t)px);
+        if (px >= 0 && px < (int16_t)h) {
+            uint16_t idx = matrix.xy_wrap(py, (uint8_t)px);
             buf_[idx] = color_from_palette(kRainbowColors, i * 255 / amount, 255);
         }
     }

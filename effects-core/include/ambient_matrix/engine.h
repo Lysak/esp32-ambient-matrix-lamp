@@ -9,8 +9,14 @@ namespace ambient_matrix {
 enum class EffectId : uint8_t {
     Rainbow = 0,
     Color, ColorShift, Gradient,
+    Scanner, BlueScanner,
+    Plasma, Aurora, OceanWaves, LavaLamp, Kaleidoscope, NeonRings,
+    MatrixRain, Comets, Starfield,
+    CosmicNebula, Wormhole, OrbitalDance, SolarStorm, Pulsar,
+    StarrySky, AsteroidImpact, PacmanOrbit, SpacePolice, PurpleMeteors,
+    LightSpeed, Supernova, MarsFlight, Singularity, RelicRadiation,
     Perlin, Particles,
-    Fire, Fire2020,
+    Campfire, Fire, Fire2020,
     Confetti, Tornado,
 };
 

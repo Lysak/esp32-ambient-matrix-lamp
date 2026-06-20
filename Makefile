@@ -11,8 +11,15 @@ CORE_SRCS := \
     effects-core/src/effect_color.cpp \
     effects-core/src/effect_color_shift.cpp \
     effects-core/src/effect_gradient.cpp \
+    effects-core/src/effect_scanner.cpp \
+    effects-core/src/effect_patterns.cpp \
+    effects-core/src/effect_matrix_rain.cpp \
+    effects-core/src/effect_comets.cpp \
+    effects-core/src/effect_starfield.cpp \
+    effects-core/src/effect_space.cpp \
     effects-core/src/effect_perlin.cpp \
     effects-core/src/effect_particles.cpp \
+    effects-core/src/effect_campfire.cpp \
     effects-core/src/effect_fire.cpp \
     effects-core/src/effect_fire2020.cpp \
     effects-core/src/effect_confetti.cpp \
