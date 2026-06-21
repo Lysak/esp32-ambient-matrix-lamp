@@ -11,7 +11,7 @@ Full component list is in [`idea.md`](idea.md) — "Hardware already bought / se
 ### Wiring
 
 ```
-WS2812B DIN  →  GPIO13 (P13)  via 470 Ω resistor
+WS2812B DIN  →  GPIO25 (P25)  via 470 Ω resistor
 WS2812B 5V   →  external 5 V PSU
 WS2812B GND  →  PSU GND  +  ESP32 GND (common ground)
 
