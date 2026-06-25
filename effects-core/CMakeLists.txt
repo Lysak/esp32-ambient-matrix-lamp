@@ -20,6 +20,8 @@ add_library(effects-core
     src/effect_fire2020.cpp
     src/effect_confetti.cpp
     src/effect_tornado.cpp
+    src/effect_noise.cpp
+    src/effect_v1_simple.cpp
 )
 
 target_include_directories(effects-core PUBLIC include)

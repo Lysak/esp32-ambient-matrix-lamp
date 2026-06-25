@@ -2,6 +2,7 @@
 #pragma once
 #include "canvas.h"
 #include "engine.h"
+#include "palette.h"
 #include <cstdint>
 #include <cstring>
 

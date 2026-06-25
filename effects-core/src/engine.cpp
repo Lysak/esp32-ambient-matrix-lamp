@@ -16,6 +16,8 @@
 #include "ambient_matrix/effect_fire2020.h"
 #include "ambient_matrix/effect_confetti.h"
 #include "ambient_matrix/effect_tornado.h"
+#include "ambient_matrix/effect_noise.h"
+#include "ambient_matrix/effect_v1_simple.h"
 
 namespace ambient_matrix {
 
@@ -60,6 +62,18 @@ void EffectEngine::set_effect(EffectId id) {
         case EffectId::Fire2020:   effect_ = std::make_unique<EffectFire2020>();   break;
         case EffectId::Confetti:   effect_ = std::make_unique<EffectConfetti>();   break;
         case EffectId::Tornado:    effect_ = std::make_unique<EffectTornado>();    break;
+        case EffectId::ColorChange:  effect_ = std::make_unique<EffectColorChange>(); break;
+        case EffectId::RainbowVert:  effect_ = std::make_unique<EffectRainbowVert>(); break;
+        case EffectId::RainbowHoriz: effect_ = std::make_unique<EffectRainbowHoriz>(); break;
+        case EffectId::Madness3D:  effect_ = std::make_unique<EffectNoise>(NoiseStyle::Madness);   break;
+        case EffectId::Clouds3D:   effect_ = std::make_unique<EffectNoise>(NoiseStyle::Clouds);    break;
+        case EffectId::Lava3D:     effect_ = std::make_unique<EffectNoise>(NoiseStyle::Lava);      break;
+        case EffectId::Plasma3D:   effect_ = std::make_unique<EffectNoise>(NoiseStyle::Plasma);    break;
+        case EffectId::Rainbow3D:  effect_ = std::make_unique<EffectNoise>(NoiseStyle::Rainbow3D); break;
+        case EffectId::Peacock3D:  effect_ = std::make_unique<EffectNoise>(NoiseStyle::Peacock);   break;
+        case EffectId::Zebra3D:    effect_ = std::make_unique<EffectNoise>(NoiseStyle::Zebra);     break;
+        case EffectId::Forest3D:   effect_ = std::make_unique<EffectNoise>(NoiseStyle::Forest);    break;
+        case EffectId::Ocean3D:    effect_ = std::make_unique<EffectNoise>(NoiseStyle::Ocean);     break;
     }
     if (effect_) effect_->reset();
 }
