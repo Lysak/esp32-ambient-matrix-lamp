@@ -42,4 +42,8 @@ esphome:
   on_boot:
     priority: -100
     then:
+      - lambda: |-
+          effect_prefs_load(id(current_effect).c_str());
+          id(effect_speed).publish_state((float)g_effect_speed);
+          id(effect_scale).publish_state((float)g_effect_scale);
       - script.execute: run_power_on_transition
