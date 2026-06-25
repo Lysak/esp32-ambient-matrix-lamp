@@ -1,6 +1,7 @@
-// Per-effect speed and scale persistence via Arduino Preferences (NVS).
+// Per-effect speed and scale persistence via ESP-IDF NVS.
 #pragma once
-#include <Preferences.h>
+#include "nvs.h"
+#include "nvs_flash.h"
 #include <cstdint>
 
 inline uint8_t g_effect_speed = 128;
@@ -25,20 +26,23 @@ inline void effect_prefs_load(const char* name) {
     char ks[16], kc[16];
     effect_prefs_key(name, 's', ks);
     effect_prefs_key(name, 'c', kc);
-    Preferences p;
-    p.begin("lamp", /*readOnly=*/true);
-    g_effect_speed = (uint8_t)p.getUInt(ks, 128);
-    g_effect_scale = (uint8_t)p.getUInt(kc, 128);
-    p.end();
+    nvs_handle_t h;
+    if (nvs_open("lampfx", NVS_READONLY, &h) != ESP_OK) return;
+    uint8_t v = 128;
+    g_effect_speed = (nvs_get_u8(h, ks, &v) == ESP_OK) ? v : 128;
+    v = 128;
+    g_effect_scale = (nvs_get_u8(h, kc, &v) == ESP_OK) ? v : 128;
+    nvs_close(h);
 }
 
 inline void effect_prefs_save(const char* name, uint8_t speed, uint8_t scale) {
     char ks[16], kc[16];
     effect_prefs_key(name, 's', ks);
     effect_prefs_key(name, 'c', kc);
-    Preferences p;
-    p.begin("lamp", /*readOnly=*/false);
-    p.putUInt(ks, speed);
-    p.putUInt(kc, scale);
-    p.end();
+    nvs_handle_t h;
+    if (nvs_open("lampfx", NVS_READWRITE, &h) != ESP_OK) return;
+    nvs_set_u8(h, ks, speed);
+    nvs_set_u8(h, kc, scale);
+    nvs_commit(h);
+    nvs_close(h);
 }

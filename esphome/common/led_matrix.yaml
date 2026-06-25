@@ -684,6 +684,7 @@ light:
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::Rainbow);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());
 
@@ -694,6 +695,7 @@ light:
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::Color);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());
 
@@ -704,6 +706,7 @@ light:
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::ColorShift);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());
 
@@ -714,6 +717,7 @@ light:
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::Gradient);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());
 
@@ -724,6 +728,7 @@ light:
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::Perlin);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());
 
@@ -734,6 +739,7 @@ light:
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::Particles);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());
 
@@ -744,6 +750,7 @@ light:
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::Fire);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());
 
@@ -754,6 +761,7 @@ light:
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::Fire2020);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());
 
@@ -764,6 +772,7 @@ light:
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::Confetti);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());
 
@@ -774,6 +783,7 @@ light:
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::Tornado);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());
 
@@ -784,6 +794,7 @@ light:
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::Scanner);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());
 
@@ -794,6 +805,7 @@ light:
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::BlueScanner);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());
 
@@ -804,6 +816,7 @@ light:
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::Plasma);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());
 
@@ -814,6 +827,7 @@ light:
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::Aurora);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());
 
@@ -824,6 +838,7 @@ light:
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::NeonRings);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());
 
@@ -834,6 +849,7 @@ light:
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::Kaleidoscope);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());
 
@@ -844,6 +860,7 @@ light:
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::MatrixRain);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());
 
@@ -854,6 +871,7 @@ light:
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::Comets);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());
 
@@ -864,6 +882,7 @@ light:
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::Starfield);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());
 
@@ -874,6 +893,7 @@ light:
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::CosmicNebula);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());
 
@@ -884,6 +904,7 @@ light:
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::Wormhole);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());
 
@@ -894,6 +915,7 @@ light:
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::OrbitalDance);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());
 
@@ -904,6 +926,7 @@ light:
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::SolarStorm);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());
 
@@ -914,6 +937,7 @@ light:
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::Pulsar);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());
 
@@ -924,6 +948,7 @@ light:
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::StarrySky);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());
 
@@ -934,6 +959,7 @@ light:
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::AsteroidImpact);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());
 
@@ -944,6 +970,7 @@ light:
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::PacmanOrbit);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());
 
@@ -954,6 +981,7 @@ light:
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::SpacePolice);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());
 
@@ -964,6 +992,7 @@ light:
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::PurpleMeteors);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());
 
@@ -974,6 +1003,7 @@ light:
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::LightSpeed);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());
 
@@ -984,6 +1014,7 @@ light:
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::Supernova);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());
 
@@ -994,6 +1025,7 @@ light:
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::MarsFlight);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());
 
@@ -1004,6 +1036,7 @@ light:
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::Singularity);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());
 
@@ -1014,6 +1047,7 @@ light:
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::RelicRadiation);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());
 
@@ -1024,6 +1058,7 @@ light:
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::OceanWaves);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());
 
@@ -1034,6 +1069,7 @@ light:
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::LavaLamp);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());
 
@@ -1044,5 +1080,6 @@ light:
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::Campfire);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());
