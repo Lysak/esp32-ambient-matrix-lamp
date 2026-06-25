@@ -270,6 +270,32 @@ number:
       - lambda: |-
           id(sunrise_max_level) = (int)x;
 
+  - platform: template
+    id: effect_speed
+    name: "Effect Speed"
+    min_value: 0
+    max_value: 255
+    step: 1
+    lambda: |-
+      return (float)g_effect_speed;
+    set_action:
+      - lambda: |-
+          g_effect_speed = (uint8_t)x;
+          effect_prefs_save(id(current_effect).c_str(), g_effect_speed, g_effect_scale);
+
+  - platform: template
+    id: effect_scale
+    name: "Effect Scale"
+    min_value: 0
+    max_value: 255
+    step: 1
+    lambda: |-
+      return (float)g_effect_scale;
+    set_action:
+      - lambda: |-
+          g_effect_scale = (uint8_t)x;
+          effect_prefs_save(id(current_effect).c_str(), g_effect_speed, g_effect_scale);
+
 datetime:
   - platform: template
     id: sunrise_sunday_time
