@@ -60,6 +60,14 @@ static void test_cylindrical_x_wrap() {
     assert(m.shortest_x_delta(15.0f, 0.0f) == -1.0f);
 }
 
+static void test_vertical_flip_moves_origin_to_top_left_wiring() {
+    Matrix m(16, 16, false, true);
+    assert(m.xy(0, 0) == 255);
+    assert(m.xy(15, 0) == 240);
+    assert(m.xy(0, 15) == 0);
+    assert(m.xy(15, 15) == 15);
+}
+
 int main() {
     test_bottom_left_is_index_zero();
     test_row0_left_to_right();
@@ -68,6 +76,7 @@ int main() {
     test_all_indices_unique_4x4();
     test_all_indices_in_bounds_16x16();
     test_cylindrical_x_wrap();
+    test_vertical_flip_moves_origin_to_top_left_wiring();
     printf("all tests passed\n");
     return 0;
 }

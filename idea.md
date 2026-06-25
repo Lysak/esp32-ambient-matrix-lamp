@@ -370,6 +370,17 @@ Memory cost: 256 × 3 bytes × 2 buffers = ~1.5 KB — negligible on ESP32.
 
 Transition duration is configurable. Default ~1 second. Crossfade applies to all effect switches: manual, auto-rotation, and song-change trigger.
 
+### Power on / off transition
+
+When the lamp powers on or off, run a short dedicated transition instead of an instant cut.
+
+Current direction:
+
+- Power on: bottom-to-top helix reveal, shifting to the right on each next row.
+- Power off: the same helix path in reverse, descending from top to bottom.
+
+This transition is separate from ambient effect switching. It is a lamp state animation, not part of the normal effect rotation.
+
 Ported from GyverLamp2 fade-between-presets behavior.
 
 ---

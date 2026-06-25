@@ -1,6 +1,8 @@
 substitutions:
   device_name: ambient-matrix-lamp
   friendly_name: Ambient Matrix Lamp
+  matrix_flip_x: "false"  # set to "true" if the matrix is mirrored left/right
+  matrix_flip_y: "true"   # set to "true" if the matrix is mounted upside down
   led_pin: GPIO25   # WS2812B DATA: ESP32 GPIO25 → 470 Ω → LED DIN
   touch_pin: GPIO27 # TTP223 OUT:   ESP32 GPIO27
   i2c_sda: GPIO21   # BH1750 SDA:   ESP32 GPIO21 (I²C default)
@@ -19,24 +21,24 @@ packages:
   board: !include boards/esp32-cp2102.yaml
   base: !include common/base.yaml
   led: !include common/led_matrix.yaml
-  light_sensor: !include common/light_sensor.yaml  # BH1750 — comment out to disable
-  mic: !include common/microphone.yaml              # INMP441 — comment out to disable
-  audio: !include common/audio.yaml                 # MAX98357A — comment out to disable
+  # light_sensor: !include common/light_sensor.yaml  # BH1750
+  # mic: !include common/microphone.yaml             # INMP441
+  # audio: !include common/audio.yaml                # MAX98357A
 
 esphome:
   name: ${device_name}
   friendly_name: ${friendly_name}
   includes:
     - custom/adapter.h
+    - custom/power_transition.h
+    - custom/sunrise_renderer.h
   libraries:
     - effects-core
   platformio_options:
     lib_extra_dirs: !secret project_root
-  # Auto-start on power-up without Home Assistant: Color Scanner at 33%.
+  # Auto-start on power-up without Home Assistant: restore the saved brightness
+  # level within the hard 33% global power ceiling.
   on_boot:
     priority: -100
     then:
-      - light.turn_on:
-          id: led_matrix
-          brightness: 33%
-          effect: "Color Scanner"
+      - script.execute: run_power_on_transition

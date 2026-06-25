@@ -12,6 +12,8 @@ This repository is for the ESP32 / ESPHome ambient matrix lamp project.
 - Be careful with tokens: do not waste them on blind scans or large irrelevant dumps.
 - If a detail is not yet defined, note it explicitly instead of inventing it.
 - All code, identifiers, comments, and commit messages must be in English.
+- For ESPHome firmware work, always use the repository `Makefile` targets. Do not run direct `esphome compile`, `esphome upload`, or `esphome run` commands when an equivalent `make` target exists.
+- For ESPHome build-and-flash flows, run `make` targets sequentially: compile first, wait for the firmware artifact to finish, then run the flash target. Never start compile and OTA upload in parallel.
 
 ## Project scope
 
@@ -30,4 +32,3 @@ Rules:
 - Rewrite each effect inside `effects-core/` as a clean C++ class that extends `Effect` and renders through the `MatrixCanvas` interface — no FastLED, no ESP8266, no GyverLamp2 protocol dependencies.
 - ESPHome handles Wi-Fi, API, OTA, entities, I2S audio, and sensors. Home Assistant handles scheduling and automation. Do not replicate GyverLamp2's UDP protocol, app, or EEPROM logic.
 - When porting an effect, note the source file in the commit message or a brief comment in the `.cpp` (e.g., `// based on fire2D.ino from GyverLamp2`).
-

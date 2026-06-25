@@ -3,14 +3,18 @@
 
 namespace ambient_matrix {
 
-// Serpentine (zigzag) layout, origin at bottom-left.
+// Serpentine (zigzag) layout, origin at bottom-left by default.
 // y=0 is the bottom row; even rows go left→right, odd rows right→left.
-// This matches the standard GyverLamp-style 16×16 matrix wiring.
+// Optional X/Y flips allow compensating for a physically mirrored or upside-
+// down matrix without rewriting any effect code.
 class Matrix {
 public:
-    Matrix(uint8_t width, uint8_t height) : width_(width), height_(height) {}
+    Matrix(uint8_t width, uint8_t height, bool flip_x = false, bool flip_y = false)
+        : width_(width), height_(height), flip_x_(flip_x), flip_y_(flip_y) {}
 
     uint16_t xy(uint8_t x, uint8_t y) const {
+        if (flip_x_) x = width_ - 1 - x;
+        if (flip_y_) y = height_ - 1 - y;
         if (y % 2 == 0)
             return (uint16_t)y * width_ + x;
         else
@@ -43,6 +47,8 @@ public:
 private:
     uint8_t width_;
     uint8_t height_;
+    bool    flip_x_;
+    bool    flip_y_;
 };
 
 } // namespace ambient_matrix

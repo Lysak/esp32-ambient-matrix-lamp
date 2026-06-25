@@ -12,8 +12,8 @@ globals:
     initial_value: '0'
   - id: current_effect
     type: std::string
-    restore_value: false
-    initial_value: '"Color Scanner"'
+    restore_value: true
+    initial_value: '"Rainbow"'
   - id: click_count
     type: uint8_t
     restore_value: false
@@ -22,11 +22,67 @@ globals:
     type: bool
     restore_value: false
     initial_value: 'false'
+  - id: single_tap_advanced
+    type: bool
+    restore_value: false
+    initial_value: 'false'
   # Persisted so ramp direction survives reboot.
   - id: brightness_up
     type: bool
     restore_value: true
     initial_value: 'true'
+  - id: lamp_brightness_level
+    type: int
+    restore_value: true
+    initial_value: '8'
+  - id: power_transition_active
+    type: bool
+    restore_value: false
+    initial_value: 'false'
+  - id: power_transition_turning_on
+    type: bool
+    restore_value: false
+    initial_value: 'false'
+  - id: power_transition_start_ms
+    type: uint32_t
+    restore_value: false
+    initial_value: '0'
+  - id: power_transition_duration_ms
+    type: uint32_t
+    restore_value: false
+    initial_value: '900'
+  - id: sunrise_active
+    type: bool
+    restore_value: false
+    initial_value: 'false'
+  - id: sunrise_start_pending
+    type: bool
+    restore_value: false
+    initial_value: 'false'
+  - id: sunrise_started_ms
+    type: uint32_t
+    restore_value: false
+    initial_value: '0'
+  - id: sunrise_ramp_duration_ms
+    type: uint32_t
+    restore_value: false
+    initial_value: '0'
+  - id: sunrise_hold_duration_ms
+    type: uint32_t
+    restore_value: false
+    initial_value: '0'
+  - id: sunrise_duration_min
+    type: int
+    restore_value: true
+    initial_value: '20'
+  - id: sunrise_hold_min
+    type: int
+    restore_value: true
+    initial_value: '10'
+  - id: sunrise_max_level
+    type: int
+    restore_value: true
+    initial_value: '10'
 
 switch:
   - platform: template
@@ -37,30 +93,90 @@ switch:
     turn_on_action:
       - if:
           condition:
-            lambda: return millis() - id(last_toggle_ms) >= 1000;
+            lambda: return id(sunrise_active);
           then:
             - lambda: |-
-                id(last_toggle_ms) = millis();
+                id(sunrise_active) = false;
+                id(power_transition_active) = false;
                 id(lamp_powered) = true;
             - light.turn_on:
                 id: led_matrix
+                brightness: !lambda return ((float) id(lamp_brightness_level)) / 10.0f;
                 effect: !lambda return id(current_effect);
+          else:
+            - if:
+                condition:
+                  lambda: return millis() - id(last_toggle_ms) >= 1000;
+                then:
+                  - script.execute: run_power_on_transition
     turn_off_action:
       - if:
           condition:
             lambda: return millis() - id(last_toggle_ms) >= 1000;
           then:
-            - lambda: |-
-                id(last_toggle_ms) = millis();
-                id(lamp_powered) = false;
+            - if:
+                condition:
+                  lambda: return id(sunrise_active);
+                then:
+                  - script.execute: stop_sunrise
+                else:
+                  - script.execute: run_power_off_transition
+  - platform: template
+    id: lamp_auto_rotate
+    name: "Lamp Auto Rotate"
+    restore_mode: RESTORE_DEFAULT_OFF
+    optimistic: true
+  - platform: template
+    id: sunrise_sunday_enabled
+    name: "Sunrise Sunday"
+    restore_mode: RESTORE_DEFAULT_OFF
+    optimistic: true
+  - platform: template
+    id: sunrise_monday_enabled
+    name: "Sunrise Monday"
+    restore_mode: RESTORE_DEFAULT_OFF
+    optimistic: true
+  - platform: template
+    id: sunrise_tuesday_enabled
+    name: "Sunrise Tuesday"
+    restore_mode: RESTORE_DEFAULT_OFF
+    optimistic: true
+  - platform: template
+    id: sunrise_wednesday_enabled
+    name: "Sunrise Wednesday"
+    restore_mode: RESTORE_DEFAULT_OFF
+    optimistic: true
+  - platform: template
+    id: sunrise_thursday_enabled
+    name: "Sunrise Thursday"
+    restore_mode: RESTORE_DEFAULT_OFF
+    optimistic: true
+  - platform: template
+    id: sunrise_friday_enabled
+    name: "Sunrise Friday"
+    restore_mode: RESTORE_DEFAULT_OFF
+    optimistic: true
+  - platform: template
+    id: sunrise_saturday_enabled
+    name: "Sunrise Saturday"
+    restore_mode: RESTORE_DEFAULT_OFF
+    optimistic: true
 
 select:
   - platform: template
     id: lamp_effect
     name: "Lamp Effect"
-    optimistic: true
-    initial_option: "Color Scanner"
     options:
+      - "Rainbow"
+      - "Color"
+      - "Color Shift"
+      - "Gradient"
+      - "Perlin"
+      - "Particles"
+      - "Fire"
+      - "Fire 2020"
+      - "Confetti"
+      - "Tornado"
       - "Color Scanner"
       - "Blue Scanner"
       - "Plasma"
@@ -87,19 +203,13 @@ select:
       - "Relic Radiation"
       - "Ocean Waves"
       - "Lava Lamp"
-      - "Rainbow"
-      - "Color"
-      - "Color Shift"
-      - "Gradient"
-      - "Perlin"
-      - "Particles"
       - "Campfire"
-      - "Fire"
-      - "Fire 2020"
-      - "Confetti"
-      - "Tornado"
+    lambda: |-
+      return id(current_effect);
     set_action:
       - lambda: |-
+          id(sunrise_active) = false;
+          id(power_transition_active) = false;
           id(current_effect) = x;
           id(lamp_powered) = true;
       - light.turn_on:
@@ -111,56 +221,309 @@ number:
     id: lamp_brightness
     name: "Lamp Brightness"
     min_value: 1
-    max_value: 255
+    max_value: 10
     step: 1
     lambda: |-
-      return (int)(id(led_matrix).current_values.get_brightness() * 255.0f);
+      return id(lamp_brightness_level);
     set_action:
+      - lambda: |-
+          id(lamp_brightness_level) = (int)x;
       - light.turn_on:
           id: led_matrix
-          brightness: !lambda return x / 255.0f;
+          brightness: !lambda return ((float) id(lamp_brightness_level)) / 10.0f;
+
+  - platform: template
+    id: lamp_sunrise_duration
+    name: "Lamp Sunrise Duration"
+    min_value: 1
+    max_value: 120
+    step: 1
+    lambda: |-
+      return id(sunrise_duration_min);
+    set_action:
+      - lambda: |-
+          id(sunrise_duration_min) = (int)x;
+
+  - platform: template
+    id: lamp_sunrise_hold
+    name: "Lamp Sunrise Hold"
+    min_value: 0
+    max_value: 120
+    step: 1
+    lambda: |-
+      return id(sunrise_hold_min);
+    set_action:
+      - lambda: |-
+          id(sunrise_hold_min) = (int)x;
+
+  - platform: template
+    id: lamp_sunrise_max
+    name: "Lamp Sunrise Max Brightness"
+    min_value: 1
+    max_value: 10
+    step: 1
+    lambda: |-
+      return id(sunrise_max_level);
+    set_action:
+      - lambda: |-
+          id(sunrise_max_level) = (int)x;
+
+datetime:
+  - platform: template
+    id: sunrise_sunday_time
+    type: time
+    name: "Sunrise Sunday Time"
+    optimistic: true
+    restore_value: true
+    initial_value: "07:00:00"
+  - platform: template
+    id: sunrise_monday_time
+    type: time
+    name: "Sunrise Monday Time"
+    optimistic: true
+    restore_value: true
+    initial_value: "07:00:00"
+  - platform: template
+    id: sunrise_tuesday_time
+    type: time
+    name: "Sunrise Tuesday Time"
+    optimistic: true
+    restore_value: true
+    initial_value: "07:00:00"
+  - platform: template
+    id: sunrise_wednesday_time
+    type: time
+    name: "Sunrise Wednesday Time"
+    optimistic: true
+    restore_value: true
+    initial_value: "07:00:00"
+  - platform: template
+    id: sunrise_thursday_time
+    type: time
+    name: "Sunrise Thursday Time"
+    optimistic: true
+    restore_value: true
+    initial_value: "07:00:00"
+  - platform: template
+    id: sunrise_friday_time
+    type: time
+    name: "Sunrise Friday Time"
+    optimistic: true
+    restore_value: true
+    initial_value: "07:00:00"
+  - platform: template
+    id: sunrise_saturday_time
+    type: time
+    name: "Sunrise Saturday Time"
+    optimistic: true
+    restore_value: true
+    initial_value: "07:00:00"
+
+time:
+  - platform: homeassistant
+    id: homeassistant_time
+    on_time_sync:
+      then:
+        - script.execute: check_sunrise_schedule
+    on_time:
+      - seconds: 0
+        then:
+          - script.execute: check_sunrise_schedule
 
 # Rotate forever while the lamp is on. cycle: true wraps the final effect back
-# to Color Scanner instead of stopping at the end of the options list.
+# to Rainbow instead of stopping at the end of the options list.
 interval:
   - interval: 1min
     then:
       - if:
           condition:
-            lambda: return id(lamp_powered);
+            lambda: return id(lamp_powered) && id(lamp_auto_rotate).state;
           then:
             - select.next:
                 id: lamp_effect
                 cycle: true
+  - interval: 1s
+    then:
+      - if:
+          condition:
+            lambda: |-
+              if (!id(sunrise_active)) return false;
+              const uint32_t total = id(sunrise_ramp_duration_ms) + id(sunrise_hold_duration_ms);
+              return millis() - id(sunrise_started_ms) >= total;
+          then:
+            - script.execute: stop_sunrise
 
-# Apply the first tap immediately so effect browsing feels responsive. If a
-# second tap arrives within 350 ms, two reverse steps correct the net result
-# from "next" to "previous" relative to the effect active before the first tap.
+# Multi-click dispatcher: each new tap resets the 800 ms window. Sunrise is
+# schedule-driven only and does not start from the touch button.
 script:
+  - id: check_sunrise_schedule
+    mode: restart
+    then:
+      - lambda: |-
+          id(sunrise_start_pending) = false;
+          auto now = id(homeassistant_time).now();
+          if (!now.is_valid()) return;
+          if (id(sunrise_active) || id(lamp_powered) || id(power_transition_active)) return;
+
+          struct DayConfig {
+            bool enabled;
+            int hour;
+            int minute;
+          };
+
+          auto get_day_config = [&](uint8_t day) -> DayConfig {
+            switch (day) {
+              case 1: return {id(sunrise_sunday_enabled).state, id(sunrise_sunday_time).hour, id(sunrise_sunday_time).minute};
+              case 2: return {id(sunrise_monday_enabled).state, id(sunrise_monday_time).hour, id(sunrise_monday_time).minute};
+              case 3: return {id(sunrise_tuesday_enabled).state, id(sunrise_tuesday_time).hour, id(sunrise_tuesday_time).minute};
+              case 4: return {id(sunrise_wednesday_enabled).state, id(sunrise_wednesday_time).hour, id(sunrise_wednesday_time).minute};
+              case 5: return {id(sunrise_thursday_enabled).state, id(sunrise_thursday_time).hour, id(sunrise_thursday_time).minute};
+              case 6: return {id(sunrise_friday_enabled).state, id(sunrise_friday_time).hour, id(sunrise_friday_time).minute};
+              case 7: return {id(sunrise_saturday_enabled).state, id(sunrise_saturday_time).hour, id(sunrise_saturday_time).minute};
+              default: return {false, 0, 0};
+            }
+          };
+
+          const int current_minutes = now.hour * 60 + now.minute;
+          const int sunrise_minutes = id(sunrise_duration_min);
+
+          auto should_start_for = [&](DayConfig cfg, bool wrapped_from_previous_day) -> bool {
+            if (!cfg.enabled) return false;
+            const int alarm_minutes = cfg.hour * 60 + cfg.minute;
+            int start_minutes = alarm_minutes - sunrise_minutes;
+            if (start_minutes < 0) start_minutes += 1440;
+            const bool wraps_midnight = start_minutes > alarm_minutes;
+            if (wrapped_from_previous_day != wraps_midnight) return false;
+            return current_minutes == start_minutes;
+          };
+
+          bool should_start = should_start_for(get_day_config(now.day_of_week), false);
+          if (!should_start) {
+            uint8_t next_day = now.day_of_week + 1;
+            if (next_day > 7) next_day = 1;
+            should_start = should_start_for(get_day_config(next_day), true);
+          }
+          if (!should_start) return;
+          id(sunrise_start_pending) = true;
+      - if:
+          condition:
+            lambda: return id(sunrise_start_pending);
+          then:
+            - script.execute: start_sunrise
+
+  - id: start_sunrise
+    mode: restart
+    then:
+      - lambda: |-
+          id(sunrise_start_pending) = false;
+          id(power_transition_active) = false;
+          id(sunrise_active) = true;
+          id(sunrise_started_ms) = millis();
+          id(sunrise_ramp_duration_ms) = (uint32_t) id(sunrise_duration_min) * 60000UL;
+          id(sunrise_hold_duration_ms) = (uint32_t) id(sunrise_hold_min) * 60000UL;
+      - light.turn_on:
+          id: led_matrix
+          brightness: 100%
+          effect: "Sunrise"
+
+  - id: stop_sunrise
+    mode: restart
+    then:
+      - lambda: |-
+          id(sunrise_active) = false;
+          id(power_transition_active) = false;
+      - light.turn_off: led_matrix
+
+  - id: run_power_on_transition
+    mode: restart
+    then:
+      - lambda: |-
+          const uint32_t now = millis();
+          id(last_toggle_ms) = now;
+          id(lamp_powered) = true;
+          id(power_transition_active) = true;
+          id(power_transition_turning_on) = true;
+          id(power_transition_start_ms) = now;
+      - light.turn_on:
+          id: led_matrix
+          brightness: !lambda return ((float) id(lamp_brightness_level)) / 10.0f;
+          effect: "Power Helix"
+      - delay: 900ms
+      - if:
+          condition:
+            lambda: return id(lamp_powered) && id(power_transition_active) && id(power_transition_turning_on);
+          then:
+            - lambda: id(power_transition_active) = false;
+            - light.turn_on:
+                id: led_matrix
+                brightness: !lambda return ((float) id(lamp_brightness_level)) / 10.0f;
+                effect: !lambda return id(current_effect);
+
+  - id: run_power_off_transition
+    mode: restart
+    then:
+      - lambda: |-
+          const uint32_t now = millis();
+          id(last_toggle_ms) = now;
+          id(power_transition_active) = true;
+          id(power_transition_turning_on) = false;
+          id(power_transition_start_ms) = now;
+      - light.turn_on:
+          id: led_matrix
+          brightness: !lambda return ((float) id(lamp_brightness_level)) / 10.0f;
+          effect: "Power Helix"
+      - delay: 900ms
+      - lambda: |-
+          id(power_transition_active) = false;
+          id(lamp_powered) = false;
+
   - id: click_handler
     mode: restart
     then:
+      - delay: 350ms
+      - lambda: |-
+          ESP_LOGI("touch", "click window closed: count=%u powered=%d advanced=%d",
+                   id(click_count), id(lamp_powered), id(single_tap_advanced));
       - if:
           condition:
             lambda: return id(click_count) == 1;
           then:
-            - select.next:
-                id: lamp_effect
-                cycle: true
-            - delay: 350ms
-            - lambda: id(click_count) = 0;
-          else:
             - if:
                 condition:
-                  lambda: return id(click_count) == 2;
+                  lambda: return !id(lamp_powered);
                 then:
-                  - select.previous:
-                      id: lamp_effect
-                      cycle: true
-                  - select.previous:
-                      id: lamp_effect
-                      cycle: true
-            - lambda: id(click_count) = 0;
+                  - lambda: ESP_LOGI("touch", "single tap -> power on");
+                  - switch.turn_on: lamp_power
+      - if:
+          condition:
+            lambda: return id(click_count) >= 2 && id(single_tap_advanced);
+          then:
+            - lambda: ESP_LOGI("touch", "undo immediate next-effect step");
+            - select.previous:
+                id: lamp_effect
+                cycle: true
+      - if:
+          condition:
+            lambda: return id(click_count) == 2;
+          then:
+            - lambda: ESP_LOGI("touch", "double tap -> previous effect");
+            - select.previous:
+                id: lamp_effect
+                cycle: true
+      - if:
+          condition:
+            lambda: return id(click_count) == 3;
+          then:
+            - lambda: ESP_LOGI("touch", "triple tap -> no action");
+      - if:
+          condition:
+            lambda: return id(click_count) >= 4;
+          then:
+            - lambda: ESP_LOGI("touch", "quad tap -> toggle power");
+            - switch.toggle: lamp_power
+      - lambda: |-
+          id(click_count) = 0;
+          id(single_tap_advanced) = false;
 
   # Replaces on_hold (removed in ESPHome 2026.x): waits 800 ms then ramps brightness.
   - id: hold_detector
@@ -179,20 +542,20 @@ script:
                     - lambda: return id(lamp_powered);
                 then:
                   - lambda: |-
-                      float b = id(led_matrix).current_values.get_brightness();
-                      const float step = 5.0f / 255.0f;
-                      b += id(brightness_up) ? step : -step;
-                      if (b >= 1.0f) {
-                        b = 1.0f;
+                      int level = id(lamp_brightness_level);
+                      level += id(brightness_up) ? 1 : -1;
+                      if (level >= 10) {
+                        level = 10;
                         id(brightness_up) = false;
-                      } else if (b <= 1.0f / 255.0f) {
-                        b = 1.0f / 255.0f;
+                      } else if (level <= 1) {
+                        level = 1;
                         id(brightness_up) = true;
                       }
+                      id(lamp_brightness_level) = level;
                       auto call = id(led_matrix).turn_on();
-                      call.set_brightness(b);
+                      call.set_brightness(((float) level) / 10.0f);
                       call.perform();
-                  - delay: 80ms
+                  - delay: 500ms
 
 binary_sensor:
   - platform: gpio
@@ -203,8 +566,8 @@ binary_sensor:
       number: ${touch_pin}
       mode: INPUT
     filters:
-      - delayed_on: 30ms
-      - delayed_off: 30ms
+      - delayed_on: 15ms
+      - delayed_off: 15ms
     on_press:
       - lambda: id(touch_long_press) = false;
       - script.execute: hold_detector
@@ -214,6 +577,16 @@ binary_sensor:
           condition:
             lambda: return !id(touch_long_press);
           then:
+            - if:
+                condition:
+                  lambda: return id(click_count) == 0 && id(lamp_powered);
+                then:
+                  - lambda: |-
+                      id(single_tap_advanced) = true;
+                      ESP_LOGI("touch", "first tap release -> immediate next effect");
+                  - select.next:
+                      id: lamp_effect
+                      cycle: true
             - lambda: id(click_count)++;
             - script.execute: click_handler
 
@@ -228,15 +601,57 @@ light:
     rgb_order: GRB
     default_transition_length: 0s
     # Hard current cap: strip max ~15.36A (256 LEDs x 60mA full white),
-    # PSU is 5V 12A. color_correct scales peak draw to ~5A.
-    color_correct: [0.32, 0.32, 0.32]
+    # Hard global ceiling: at full slider brightness the matrix is limited to
+    # roughly 33% of raw LED output, keeping PSU load within budget.
+    color_correct: [0.33, 0.33, 0.33]
     effects:
+      - addressable_lambda:
+          name: "Power Helix"
+          update_interval: 30ms
+          lambda: |-
+            static const ambient_matrix::Matrix matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y});
+            if (!id(power_transition_active)) {
+              if (!id(lamp_powered)) {
+                ESPHomeMatrixCanvas(it).clear();
+                return;
+              }
+              PowerTransitionRenderer::render_helix(it, matrix, 1.0f, true);
+              return;
+            }
+
+            const uint32_t elapsed = millis() - id(power_transition_start_ms);
+            float progress = (float) elapsed / (float) id(power_transition_duration_ms);
+            if (progress > 1.0f) progress = 1.0f;
+            PowerTransitionRenderer::render_helix(it, matrix, progress, id(power_transition_turning_on));
+
+      - addressable_lambda:
+          name: "Sunrise"
+          update_interval: 30ms
+          lambda: |-
+            if (!id(sunrise_active)) {
+              ESPHomeMatrixCanvas(it).clear();
+              return;
+            }
+
+            const uint32_t elapsed = millis() - id(sunrise_started_ms);
+            const uint32_t ramp_ms = id(sunrise_ramp_duration_ms);
+            uint8_t progress = 255;
+            if (ramp_ms > 0 && elapsed < ramp_ms) {
+              progress = (uint8_t) ((elapsed * 255UL) / ramp_ms);
+            }
+
+            int max_level = id(sunrise_max_level);
+            if (max_level < 1) max_level = 1;
+            if (max_level > 10) max_level = 10;
+            const uint8_t max_brightness = (uint8_t) ((max_level * 255) / 10);
+            SunriseRenderer::render(it, progress, max_brightness);
+
       - addressable_lambda:
           name: "Rainbow"
           update_interval: 30ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
-            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::Rainbow);
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());
@@ -246,7 +661,7 @@ light:
           update_interval: 30ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
-            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::Color);
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());
@@ -256,7 +671,7 @@ light:
           update_interval: 30ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
-            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::ColorShift);
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());
@@ -266,268 +681,8 @@ light:
           update_interval: 30ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
-            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::Gradient);
-            ESPHomeMatrixCanvas canvas(it);
-            engine.tick(canvas, millis());
-
-      - addressable_lambda:
-          name: "Color Scanner"
-          update_interval: 20ms
-          lambda: |-
-            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
-            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
-            if (initial_run) engine.set_effect(ambient_matrix::EffectId::Scanner);
-            ESPHomeMatrixCanvas canvas(it);
-            engine.tick(canvas, millis());
-
-      - addressable_lambda:
-          name: "Blue Scanner"
-          update_interval: 20ms
-          lambda: |-
-            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
-            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
-            if (initial_run) engine.set_effect(ambient_matrix::EffectId::BlueScanner);
-            ESPHomeMatrixCanvas canvas(it);
-            engine.tick(canvas, millis());
-
-      - addressable_lambda:
-          name: "Plasma"
-          update_interval: 25ms
-          lambda: |-
-            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
-            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
-            if (initial_run) engine.set_effect(ambient_matrix::EffectId::Plasma);
-            ESPHomeMatrixCanvas canvas(it);
-            engine.tick(canvas, millis());
-
-      - addressable_lambda:
-          name: "Aurora"
-          update_interval: 25ms
-          lambda: |-
-            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
-            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
-            if (initial_run) engine.set_effect(ambient_matrix::EffectId::Aurora);
-            ESPHomeMatrixCanvas canvas(it);
-            engine.tick(canvas, millis());
-
-      - addressable_lambda:
-          name: "Neon Rings"
-          update_interval: 25ms
-          lambda: |-
-            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
-            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
-            if (initial_run) engine.set_effect(ambient_matrix::EffectId::NeonRings);
-            ESPHomeMatrixCanvas canvas(it);
-            engine.tick(canvas, millis());
-
-      - addressable_lambda:
-          name: "Kaleidoscope"
-          update_interval: 25ms
-          lambda: |-
-            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
-            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
-            if (initial_run) engine.set_effect(ambient_matrix::EffectId::Kaleidoscope);
-            ESPHomeMatrixCanvas canvas(it);
-            engine.tick(canvas, millis());
-
-      - addressable_lambda:
-          name: "Digital Rain"
-          update_interval: 25ms
-          lambda: |-
-            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
-            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
-            if (initial_run) engine.set_effect(ambient_matrix::EffectId::MatrixRain);
-            ESPHomeMatrixCanvas canvas(it);
-            engine.tick(canvas, millis());
-
-      - addressable_lambda:
-          name: "Comet Shower"
-          update_interval: 25ms
-          lambda: |-
-            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
-            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
-            if (initial_run) engine.set_effect(ambient_matrix::EffectId::Comets);
-            ESPHomeMatrixCanvas canvas(it);
-            engine.tick(canvas, millis());
-
-      - addressable_lambda:
-          name: "Starfield"
-          update_interval: 25ms
-          lambda: |-
-            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
-            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
-            if (initial_run) engine.set_effect(ambient_matrix::EffectId::Starfield);
-            ESPHomeMatrixCanvas canvas(it);
-            engine.tick(canvas, millis());
-
-      - addressable_lambda:
-          name: "Cosmic Nebula"
-          update_interval: 25ms
-          lambda: |-
-            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
-            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
-            if (initial_run) engine.set_effect(ambient_matrix::EffectId::CosmicNebula);
-            ESPHomeMatrixCanvas canvas(it);
-            engine.tick(canvas, millis());
-
-      - addressable_lambda:
-          name: "Wormhole"
-          update_interval: 25ms
-          lambda: |-
-            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
-            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
-            if (initial_run) engine.set_effect(ambient_matrix::EffectId::Wormhole);
-            ESPHomeMatrixCanvas canvas(it);
-            engine.tick(canvas, millis());
-
-      - addressable_lambda:
-          name: "Orbital Dance"
-          update_interval: 25ms
-          lambda: |-
-            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
-            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
-            if (initial_run) engine.set_effect(ambient_matrix::EffectId::OrbitalDance);
-            ESPHomeMatrixCanvas canvas(it);
-            engine.tick(canvas, millis());
-
-      - addressable_lambda:
-          name: "Solar Storm"
-          update_interval: 25ms
-          lambda: |-
-            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
-            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
-            if (initial_run) engine.set_effect(ambient_matrix::EffectId::SolarStorm);
-            ESPHomeMatrixCanvas canvas(it);
-            engine.tick(canvas, millis());
-
-      - addressable_lambda:
-          name: "Pulsar"
-          update_interval: 25ms
-          lambda: |-
-            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
-            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
-            if (initial_run) engine.set_effect(ambient_matrix::EffectId::Pulsar);
-            ESPHomeMatrixCanvas canvas(it);
-            engine.tick(canvas, millis());
-
-      - addressable_lambda:
-          name: "Starry Sky"
-          update_interval: 25ms
-          lambda: |-
-            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
-            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
-            if (initial_run) engine.set_effect(ambient_matrix::EffectId::StarrySky);
-            ESPHomeMatrixCanvas canvas(it);
-            engine.tick(canvas, millis());
-
-      - addressable_lambda:
-          name: "Asteroid Impact"
-          update_interval: 25ms
-          lambda: |-
-            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
-            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
-            if (initial_run) engine.set_effect(ambient_matrix::EffectId::AsteroidImpact);
-            ESPHomeMatrixCanvas canvas(it);
-            engine.tick(canvas, millis());
-
-      - addressable_lambda:
-          name: "Pac-Man Orbit"
-          update_interval: 25ms
-          lambda: |-
-            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
-            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
-            if (initial_run) engine.set_effect(ambient_matrix::EffectId::PacmanOrbit);
-            ESPHomeMatrixCanvas canvas(it);
-            engine.tick(canvas, millis());
-
-      - addressable_lambda:
-          name: "Space Police"
-          update_interval: 25ms
-          lambda: |-
-            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
-            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
-            if (initial_run) engine.set_effect(ambient_matrix::EffectId::SpacePolice);
-            ESPHomeMatrixCanvas canvas(it);
-            engine.tick(canvas, millis());
-
-      - addressable_lambda:
-          name: "Purple Meteor Shower"
-          update_interval: 25ms
-          lambda: |-
-            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
-            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
-            if (initial_run) engine.set_effect(ambient_matrix::EffectId::PurpleMeteors);
-            ESPHomeMatrixCanvas canvas(it);
-            engine.tick(canvas, millis());
-
-      - addressable_lambda:
-          name: "Light Speed"
-          update_interval: 25ms
-          lambda: |-
-            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
-            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
-            if (initial_run) engine.set_effect(ambient_matrix::EffectId::LightSpeed);
-            ESPHomeMatrixCanvas canvas(it);
-            engine.tick(canvas, millis());
-
-      - addressable_lambda:
-          name: "Supernova"
-          update_interval: 25ms
-          lambda: |-
-            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
-            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
-            if (initial_run) engine.set_effect(ambient_matrix::EffectId::Supernova);
-            ESPHomeMatrixCanvas canvas(it);
-            engine.tick(canvas, millis());
-
-      - addressable_lambda:
-          name: "Flight to Mars"
-          update_interval: 25ms
-          lambda: |-
-            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
-            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
-            if (initial_run) engine.set_effect(ambient_matrix::EffectId::MarsFlight);
-            ESPHomeMatrixCanvas canvas(it);
-            engine.tick(canvas, millis());
-
-      - addressable_lambda:
-          name: "Singularity"
-          update_interval: 25ms
-          lambda: |-
-            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
-            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
-            if (initial_run) engine.set_effect(ambient_matrix::EffectId::Singularity);
-            ESPHomeMatrixCanvas canvas(it);
-            engine.tick(canvas, millis());
-
-      - addressable_lambda:
-          name: "Relic Radiation"
-          update_interval: 25ms
-          lambda: |-
-            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
-            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
-            if (initial_run) engine.set_effect(ambient_matrix::EffectId::RelicRadiation);
-            ESPHomeMatrixCanvas canvas(it);
-            engine.tick(canvas, millis());
-
-      - addressable_lambda:
-          name: "Ocean Waves"
-          update_interval: 25ms
-          lambda: |-
-            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
-            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
-            if (initial_run) engine.set_effect(ambient_matrix::EffectId::OceanWaves);
-            ESPHomeMatrixCanvas canvas(it);
-            engine.tick(canvas, millis());
-
-      - addressable_lambda:
-          name: "Lava Lamp"
-          update_interval: 25ms
-          lambda: |-
-            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
-            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
-            if (initial_run) engine.set_effect(ambient_matrix::EffectId::LavaLamp);
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());
 
@@ -536,7 +691,7 @@ light:
           update_interval: 30ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
-            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::Perlin);
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());
@@ -546,18 +701,8 @@ light:
           update_interval: 30ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
-            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::Particles);
-            ESPHomeMatrixCanvas canvas(it);
-            engine.tick(canvas, millis());
-
-      - addressable_lambda:
-          name: "Campfire"
-          update_interval: 30ms
-          lambda: |-
-            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
-            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
-            if (initial_run) engine.set_effect(ambient_matrix::EffectId::Campfire);
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());
 
@@ -566,7 +711,7 @@ light:
           update_interval: 30ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
-            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::Fire);
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());
@@ -576,7 +721,7 @@ light:
           update_interval: 30ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
-            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::Fire2020);
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());
@@ -586,7 +731,7 @@ light:
           update_interval: 30ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
-            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::Confetti);
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());
@@ -596,7 +741,277 @@ light:
           update_interval: 30ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
-            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::Tornado);
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Color Scanner"
+          update_interval: 20ms
+          lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::Scanner);
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Blue Scanner"
+          update_interval: 20ms
+          lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::BlueScanner);
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Plasma"
+          update_interval: 25ms
+          lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::Plasma);
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Aurora"
+          update_interval: 25ms
+          lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::Aurora);
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Neon Rings"
+          update_interval: 25ms
+          lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::NeonRings);
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Kaleidoscope"
+          update_interval: 25ms
+          lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::Kaleidoscope);
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Digital Rain"
+          update_interval: 25ms
+          lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::MatrixRain);
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Comet Shower"
+          update_interval: 25ms
+          lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::Comets);
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Starfield"
+          update_interval: 25ms
+          lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::Starfield);
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Cosmic Nebula"
+          update_interval: 25ms
+          lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::CosmicNebula);
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Wormhole"
+          update_interval: 25ms
+          lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::Wormhole);
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Orbital Dance"
+          update_interval: 25ms
+          lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::OrbitalDance);
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Solar Storm"
+          update_interval: 25ms
+          lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::SolarStorm);
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Pulsar"
+          update_interval: 25ms
+          lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::Pulsar);
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Starry Sky"
+          update_interval: 25ms
+          lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::StarrySky);
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Asteroid Impact"
+          update_interval: 25ms
+          lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::AsteroidImpact);
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Pac-Man Orbit"
+          update_interval: 25ms
+          lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::PacmanOrbit);
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Space Police"
+          update_interval: 25ms
+          lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::SpacePolice);
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Purple Meteor Shower"
+          update_interval: 25ms
+          lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::PurpleMeteors);
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Light Speed"
+          update_interval: 25ms
+          lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::LightSpeed);
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Supernova"
+          update_interval: 25ms
+          lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::Supernova);
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Flight to Mars"
+          update_interval: 25ms
+          lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::MarsFlight);
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Singularity"
+          update_interval: 25ms
+          lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::Singularity);
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Relic Radiation"
+          update_interval: 25ms
+          lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::RelicRadiation);
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Ocean Waves"
+          update_interval: 25ms
+          lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::OceanWaves);
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Lava Lamp"
+          update_interval: 25ms
+          lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::LavaLamp);
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Campfire"
+          update_interval: 30ms
+          lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::Campfire);
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());

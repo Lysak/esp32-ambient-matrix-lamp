@@ -47,7 +47,7 @@ globals:
   - id: pre_measure_brightness
     type: float
     restore_value: false
-    initial_value: '0.33'
+    initial_value: '1.0'
 
 # ── sensor ────────────────────────────────────────────────────────────────────
 

@@ -27,18 +27,47 @@ TTP223 OUT   →  GPIO27 (P27)
 
 ### Touch button behaviour
 
-Multi-click logic mirrors GyverLamp2 (800 ms window after the last tap):
+Multi-click logic uses a short `350 ms` window after the last tap for faster response:
 
 | Gesture | Action |
 |---|---|
-| 1 tap | Toggle power on / off |
-| 2 taps | Next effect |
-| 3 taps | Previous effect |
-| 4 taps | First effect (Rainbow) |
-| Hold ≥ 800 ms (lamp on) | Ramp brightness ±5/255 every 80 ms |
-| Release after hold | Flip ramp direction for the next hold |
+| 1 tap (lamp on) | Next effect |
+| 1 tap (lamp off) | Power on, keep the last saved effect |
+| 2 taps | Previous effect |
+| 3 taps | No action |
+| 4 taps | Toggle power on / off |
+| Hold ≥ 800 ms (lamp on) | Ramp brightness level `1..10` every 500 ms |
 
-The lamp powers on automatically at boot (Rainbow, 35% brightness) without needing Home Assistant.
+### Sunrise schedule
+
+`Sunrise` now follows the original GyverLamp2 dawn model as a scheduler, not a button gesture:
+
+- time source: Home Assistant via the native ESPHome API
+- per-day configuration: one enable switch and one alarm time entity for each weekday
+- ramp: starts `Lamp Sunrise Duration` minutes before the alarm time
+- peak: reaches full configured sunrise brightness exactly at the alarm time
+- hold: stays at peak for `Lamp Sunrise Hold` minutes, then turns off
+
+The sunrise only starts if the lamp is currently not being used as a normal effect lamp, meaning `Lamp Power` is off at the scheduled start minute. If the lamp is already on, that sunrise slot is skipped.
+
+### Brightness and power limit
+
+The firmware enforces a hard global output ceiling of about 33% of the raw LED matrix maximum, keeping the lamp inside the PSU budget.
+
+Brightness is controlled separately through the `Lamp Brightness` number entity:
+
+- range: `1..10`
+- default: `8` (80% of the allowed 33% ceiling)
+- persisted across reboot and power loss
+
+The last selected effect is also persisted across reboot and power loss.
+
+On boot, the lamp powers on automatically with the last saved effect and the last saved brightness level, without needing Home Assistant.
+
+### Optional auto-rotation
+
+Effect auto-rotation is disabled by default and exposed as a separate `Lamp Auto Rotate` switch in ESPHome / Home Assistant.
+When enabled, it advances to the next effect every 1 minute while the lamp is on.
 
 ---
 
@@ -66,7 +95,7 @@ Install the CP2102 USB driver if not already present:
 | `make preview` | Run Rainbow effect in terminal (Ctrl+C to stop) |
 | `make clean` | Remove build directory |
 | `make esphome-compile` | Validate ESPHome firmware (no device needed) |
-| `make esphome-flash` | Flash via OTA (device on Wi-Fi) |
+| `make esphome-flash` | Flash via OTA; uses `esphome/.device_ip` if present, otherwise mDNS |
 | `make esphome-flash DEVICE=/dev/tty.xxx` | Flash via USB serial |
 | `make gen-api-key` | Generate a random ESPHome API encryption key |
 
@@ -133,7 +162,9 @@ Once the device is on Wi-Fi you no longer need the USB cable:
 make esphome-flash
 ```
 
-By default this resolves the device via mDNS (`ambient-matrix-lamp.local`), which can be flaky on some networks. To flash by IP instead, write it to `esphome/.device_ip` (gitignored, local-only):
+`make esphome-flash` first checks `esphome/.device_ip` (gitignored, local-only). If that file exists, OTA uses the saved IP address. Otherwise ESPHome falls back to mDNS (`ambient-matrix-lamp.local`), which can be flaky on some networks.
+
+To force OTA by IP, write it to `esphome/.device_ip`:
 
 ```bash
 echo "192.168.1.123" > esphome/.device_ip
