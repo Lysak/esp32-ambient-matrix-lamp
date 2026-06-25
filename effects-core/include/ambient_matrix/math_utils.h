@@ -33,4 +33,7 @@ inline Rgb add_rgb(const Rgb& a, const Rgb& b) {
     return { qadd8(a.r, b.r), qadd8(a.g, b.g), qadd8(a.b, b.b) };
 }
 
+// Quadratic dimming: x²/256. Used by noise effects for brightness shaping.
+inline uint8_t dim8_raw(uint8_t x) { return scale8(x, x); }
+
 } // namespace ambient_matrix
