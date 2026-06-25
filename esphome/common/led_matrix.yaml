@@ -177,6 +177,19 @@ select:
       - "Fire 2020"
       - "Confetti"
       - "Tornado"
+      # GyverLamp v1 originals
+      - "Color Change"
+      - "Rainbow Vert"
+      - "Rainbow Horiz"
+      - "Madness 3D"
+      - "Clouds 3D"
+      - "Lava 3D"
+      - "Plasma 3D"
+      - "Rainbow 3D"
+      - "Peacock 3D"
+      - "Zebra 3D"
+      - "Forest 3D"
+      - "Ocean 3D"
       # Custom effects
       - "Rainbow 2"
       - "Color Scanner 2"
@@ -783,6 +796,138 @@ light:
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
             if (initial_run) engine.set_effect(ambient_matrix::EffectId::Tornado);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Color Change"
+          update_interval: 30ms
+          lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::ColorChange);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Rainbow Vert"
+          update_interval: 30ms
+          lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::RainbowVert);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Rainbow Horiz"
+          update_interval: 30ms
+          lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::RainbowHoriz);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Madness 3D"
+          update_interval: 30ms
+          lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::Madness3D);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Clouds 3D"
+          update_interval: 30ms
+          lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::Clouds3D);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Lava 3D"
+          update_interval: 30ms
+          lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::Lava3D);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Plasma 3D"
+          update_interval: 30ms
+          lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::Plasma3D);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Rainbow 3D"
+          update_interval: 30ms
+          lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::Rainbow3D);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Peacock 3D"
+          update_interval: 30ms
+          lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::Peacock3D);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Zebra 3D"
+          update_interval: 30ms
+          lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::Zebra3D);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Forest 3D"
+          update_interval: 30ms
+          lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::Forest3D);
+            engine.set_params({g_effect_speed, g_effect_scale, 0});
+            ESPHomeMatrixCanvas canvas(it);
+            engine.tick(canvas, millis());
+
+      - addressable_lambda:
+          name: "Ocean 3D"
+          update_interval: 30ms
+          lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
+            static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y})};
+            if (initial_run) engine.set_effect(ambient_matrix::EffectId::Ocean3D);
             engine.set_params({g_effect_speed, g_effect_scale, 0});
             ESPHomeMatrixCanvas canvas(it);
             engine.tick(canvas, millis());
