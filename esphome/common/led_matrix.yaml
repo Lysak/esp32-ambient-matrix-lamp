@@ -292,6 +292,7 @@ number:
     min_value: 0
     max_value: 255
     step: 1
+    update_interval: 5s
     lambda: |-
       return (float)g_effect_speed;
     set_action:
@@ -305,6 +306,7 @@ number:
     min_value: 0
     max_value: 255
     step: 1
+    update_interval: 5s
     lambda: |-
       return (float)g_effect_scale;
     set_action:
