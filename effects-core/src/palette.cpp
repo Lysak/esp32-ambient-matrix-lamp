@@ -76,4 +76,36 @@ const Palette16 kCampfireColors = {{
     {255,110,  2}, {255,150, 10}, {255,195, 42}, {255,230,110},
 }};
 
+// Blue/grey/white sky gradient (mirrors FastLED CloudColors)
+const Palette16 kCloudColors = {{
+    {  0,   0, 255}, {  0,   0, 220}, { 30,  30, 255}, { 60,  60, 255},
+    {128, 128, 255}, {170, 170, 255}, {200, 200, 255}, {220, 220, 255},
+    {255, 255, 255}, {220, 220, 255}, {180, 180, 220}, {128, 128, 200},
+    { 60,  60, 180}, { 30,  30, 160}, {  0,   0, 200}, {  0,   0, 255},
+}};
+
+// Bright party colors: purple/magenta/blue/cyan/yellow/red cycle (mirrors FastLED PartyColors)
+const Palette16 kPartyColors = {{
+    { 85,   0, 128}, {129,   0, 147}, {170,   0, 154}, {186,   0, 122},
+    {215,   0, 217}, {151,   0, 255}, { 12,   0, 255}, {  0,  55, 255},
+    {  0, 255, 213}, {  0, 255,  85}, {  0, 255,  42}, { 55, 255,   0},
+    {255, 255,   0}, {255, 128,   0}, {255,  85,   0}, {255,  42,   0},
+}};
+
+// Rainbow stripes: each hue block separated by a black entry (mirrors FastLED RainbowStripeColors)
+const Palette16 kRainbowStripeColors = {{
+    {255,   0,   0}, {  0,   0,   0}, {171, 171,   0}, {  0,   0,   0},
+    {  0, 255,   0}, {  0,   0,   0}, {  0, 171, 171}, {  0,   0,   0},
+    {  0,   0, 255}, {  0,   0,   0}, {171,   0, 171}, {  0,   0,   0},
+    {255,   0,  85}, {  0,   0,   0}, {255,   0,   0}, {  0,   0,   0},
+}};
+
+// Zebra: white stripes on black, white every 4th entry
+const Palette16 kZebraColors = {{
+    {255, 255, 255}, {  0,   0,   0}, {  0,   0,   0}, {  0,   0,   0},
+    {255, 255, 255}, {  0,   0,   0}, {  0,   0,   0}, {  0,   0,   0},
+    {255, 255, 255}, {  0,   0,   0}, {  0,   0,   0}, {  0,   0,   0},
+    {255, 255, 255}, {  0,   0,   0}, {  0,   0,   0}, {  0,   0,   0},
+}};
+
 } // namespace ambient_matrix
