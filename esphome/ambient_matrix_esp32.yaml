@@ -32,6 +32,7 @@ esphome:
     - custom/adapter.h
     - custom/power_transition.h
     - custom/sunrise_renderer.h
+    - custom/effect_prefs.h
   libraries:
     - effects-core
   platformio_options:
