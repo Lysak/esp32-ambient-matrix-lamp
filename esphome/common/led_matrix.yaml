@@ -13,7 +13,7 @@ globals:
   - id: current_effect
     type: std::string
     restore_value: true
-    initial_value: '"Rainbow"'
+    initial_value: '"Color"'
   - id: click_count
     type: uint8_t
     restore_value: false
@@ -167,7 +167,7 @@ select:
     id: lamp_effect
     name: "Lamp Effect"
     options:
-      - "Rainbow"
+      # GyverLamp2 originals
       - "Color"
       - "Color Shift"
       - "Gradient"
@@ -177,33 +177,35 @@ select:
       - "Fire 2020"
       - "Confetti"
       - "Tornado"
-      - "Color Scanner"
-      - "Blue Scanner"
-      - "Plasma"
-      - "Aurora"
-      - "Neon Rings"
-      - "Kaleidoscope"
-      - "Digital Rain"
-      - "Comet Shower"
-      - "Starfield"
-      - "Cosmic Nebula"
-      - "Wormhole"
-      - "Orbital Dance"
-      - "Solar Storm"
-      - "Pulsar"
-      - "Starry Sky"
-      - "Asteroid Impact"
-      - "Pac-Man Orbit"
-      - "Space Police"
-      - "Purple Meteor Shower"
-      - "Light Speed"
-      - "Supernova"
-      - "Flight to Mars"
-      - "Singularity"
-      - "Relic Radiation"
-      - "Ocean Waves"
-      - "Lava Lamp"
-      - "Campfire"
+      # Custom effects
+      - "Rainbow 2"
+      - "Color Scanner 2"
+      - "Blue Scanner 2"
+      - "Plasma 2"
+      - "Aurora 2"
+      - "Neon Rings 2"
+      - "Kaleidoscope 2"
+      - "Digital Rain 2"
+      - "Comet Shower 2"
+      - "Starfield 2"
+      - "Cosmic Nebula 2"
+      - "Wormhole 2"
+      - "Orbital Dance 2"
+      - "Solar Storm 2"
+      - "Pulsar 2"
+      - "Starry Sky 2"
+      - "Asteroid Impact 2"
+      - "Pac-Man Orbit 2"
+      - "Space Police 2"
+      - "Purple Meteor Shower 2"
+      - "Light Speed 2"
+      - "Supernova 2"
+      - "Flight to Mars 2"
+      - "Singularity 2"
+      - "Relic Radiation 2"
+      - "Ocean Waves 2"
+      - "Lava Lamp 2"
+      - "Campfire 2"
     lambda: |-
       return id(current_effect);
     set_action:
@@ -647,7 +649,7 @@ light:
             SunriseRenderer::render(it, progress, max_brightness);
 
       - addressable_lambda:
-          name: "Rainbow"
+          name: "Rainbow 2"
           update_interval: 30ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
@@ -747,7 +749,7 @@ light:
             engine.tick(canvas, millis());
 
       - addressable_lambda:
-          name: "Color Scanner"
+          name: "Color Scanner 2"
           update_interval: 20ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
@@ -757,7 +759,7 @@ light:
             engine.tick(canvas, millis());
 
       - addressable_lambda:
-          name: "Blue Scanner"
+          name: "Blue Scanner 2"
           update_interval: 20ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
@@ -767,7 +769,7 @@ light:
             engine.tick(canvas, millis());
 
       - addressable_lambda:
-          name: "Plasma"
+          name: "Plasma 2"
           update_interval: 25ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
@@ -777,7 +779,7 @@ light:
             engine.tick(canvas, millis());
 
       - addressable_lambda:
-          name: "Aurora"
+          name: "Aurora 2"
           update_interval: 25ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
@@ -787,7 +789,7 @@ light:
             engine.tick(canvas, millis());
 
       - addressable_lambda:
-          name: "Neon Rings"
+          name: "Neon Rings 2"
           update_interval: 25ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
@@ -797,7 +799,7 @@ light:
             engine.tick(canvas, millis());
 
       - addressable_lambda:
-          name: "Kaleidoscope"
+          name: "Kaleidoscope 2"
           update_interval: 25ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
@@ -807,7 +809,7 @@ light:
             engine.tick(canvas, millis());
 
       - addressable_lambda:
-          name: "Digital Rain"
+          name: "Digital Rain 2"
           update_interval: 25ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
@@ -817,7 +819,7 @@ light:
             engine.tick(canvas, millis());
 
       - addressable_lambda:
-          name: "Comet Shower"
+          name: "Comet Shower 2"
           update_interval: 25ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
@@ -827,7 +829,7 @@ light:
             engine.tick(canvas, millis());
 
       - addressable_lambda:
-          name: "Starfield"
+          name: "Starfield 2"
           update_interval: 25ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
@@ -837,7 +839,7 @@ light:
             engine.tick(canvas, millis());
 
       - addressable_lambda:
-          name: "Cosmic Nebula"
+          name: "Cosmic Nebula 2"
           update_interval: 25ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
@@ -847,7 +849,7 @@ light:
             engine.tick(canvas, millis());
 
       - addressable_lambda:
-          name: "Wormhole"
+          name: "Wormhole 2"
           update_interval: 25ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
@@ -857,7 +859,7 @@ light:
             engine.tick(canvas, millis());
 
       - addressable_lambda:
-          name: "Orbital Dance"
+          name: "Orbital Dance 2"
           update_interval: 25ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
@@ -867,7 +869,7 @@ light:
             engine.tick(canvas, millis());
 
       - addressable_lambda:
-          name: "Solar Storm"
+          name: "Solar Storm 2"
           update_interval: 25ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
@@ -877,7 +879,7 @@ light:
             engine.tick(canvas, millis());
 
       - addressable_lambda:
-          name: "Pulsar"
+          name: "Pulsar 2"
           update_interval: 25ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
@@ -887,7 +889,7 @@ light:
             engine.tick(canvas, millis());
 
       - addressable_lambda:
-          name: "Starry Sky"
+          name: "Starry Sky 2"
           update_interval: 25ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
@@ -897,7 +899,7 @@ light:
             engine.tick(canvas, millis());
 
       - addressable_lambda:
-          name: "Asteroid Impact"
+          name: "Asteroid Impact 2"
           update_interval: 25ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
@@ -907,7 +909,7 @@ light:
             engine.tick(canvas, millis());
 
       - addressable_lambda:
-          name: "Pac-Man Orbit"
+          name: "Pac-Man Orbit 2"
           update_interval: 25ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
@@ -917,7 +919,7 @@ light:
             engine.tick(canvas, millis());
 
       - addressable_lambda:
-          name: "Space Police"
+          name: "Space Police 2"
           update_interval: 25ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
@@ -927,7 +929,7 @@ light:
             engine.tick(canvas, millis());
 
       - addressable_lambda:
-          name: "Purple Meteor Shower"
+          name: "Purple Meteor Shower 2"
           update_interval: 25ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
@@ -937,7 +939,7 @@ light:
             engine.tick(canvas, millis());
 
       - addressable_lambda:
-          name: "Light Speed"
+          name: "Light Speed 2"
           update_interval: 25ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
@@ -947,7 +949,7 @@ light:
             engine.tick(canvas, millis());
 
       - addressable_lambda:
-          name: "Supernova"
+          name: "Supernova 2"
           update_interval: 25ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
@@ -957,7 +959,7 @@ light:
             engine.tick(canvas, millis());
 
       - addressable_lambda:
-          name: "Flight to Mars"
+          name: "Flight to Mars 2"
           update_interval: 25ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
@@ -967,7 +969,7 @@ light:
             engine.tick(canvas, millis());
 
       - addressable_lambda:
-          name: "Singularity"
+          name: "Singularity 2"
           update_interval: 25ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
@@ -977,7 +979,7 @@ light:
             engine.tick(canvas, millis());
 
       - addressable_lambda:
-          name: "Relic Radiation"
+          name: "Relic Radiation 2"
           update_interval: 25ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
@@ -987,7 +989,7 @@ light:
             engine.tick(canvas, millis());
 
       - addressable_lambda:
-          name: "Ocean Waves"
+          name: "Ocean Waves 2"
           update_interval: 25ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
@@ -997,7 +999,7 @@ light:
             engine.tick(canvas, millis());
 
       - addressable_lambda:
-          name: "Lava Lamp"
+          name: "Lava Lamp 2"
           update_interval: 25ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
@@ -1007,7 +1009,7 @@ light:
             engine.tick(canvas, millis());
 
       - addressable_lambda:
-          name: "Campfire"
+          name: "Campfire 2"
           update_interval: 30ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
