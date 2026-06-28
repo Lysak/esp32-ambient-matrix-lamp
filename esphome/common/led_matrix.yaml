@@ -693,6 +693,29 @@ light:
             SunriseRenderer::render(it, progress, max_brightness);
 
       - addressable_lambda:
+          name: "Matrix Debug Corners"
+          update_interval: 250ms
+          lambda: |-
+            if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
+
+            static const ambient_matrix::Matrix matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y});
+            ESPHomeMatrixCanvas canvas(it);
+            canvas.clear();
+
+            auto draw_block = [&](int start_x, int start_y, ambient_matrix::Rgb color) {
+              for (int dy = 0; dy < 2; dy++) {
+                for (int dx = 0; dx < 2; dx++) {
+                  canvas.set_pixel(matrix.xy(start_x + dx, start_y + dy), color);
+                }
+              }
+            };
+
+            draw_block(0, 0, ambient_matrix::Rgb{255, 0, 0});
+            draw_block(14, 0, ambient_matrix::Rgb{0, 255, 0});
+            draw_block(0, 14, ambient_matrix::Rgb{0, 0, 255});
+            draw_block(14, 14, ambient_matrix::Rgb{255, 255, 0});
+
+      - addressable_lambda:
           name: "Rainbow 2"
           update_interval: 30ms
           lambda: |-

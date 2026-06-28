@@ -120,6 +120,7 @@ wifi_password: "YourWiFiPassword"
 ap_password: "SomeHotspotPassword"
 api_encryption_key: "..."     # see below
 ota_password: "SomeOTAPassword"
+debug_package: common/debug_off.yaml   # set common/debug_on.yaml to expose debug controls
 ```
 
 Generate the API encryption key:
@@ -130,6 +131,20 @@ make gen-api-key
 ```
 
 Paste the output into `api_encryption_key: "..."` in `secrets.yaml`.
+
+To expose the matrix orientation helper in Home Assistant, set:
+
+```yaml
+debug_package: common/debug_on.yaml
+```
+
+This adds a config button named `Matrix Debug Corners` that turns on a
+four-corner test pattern:
+
+- red `2x2`: `(0,0)`
+- green `2x2`: `(15,0)`
+- blue `2x2`: `(0,15)`
+- yellow `2x2`: `(15,15)`
 
 ### 2. Find the serial port
 

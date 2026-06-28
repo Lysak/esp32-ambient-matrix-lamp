@@ -1,6 +1,7 @@
 substitutions:
   device_name: ambient-matrix-lamp
   friendly_name: Ambient Matrix Lamp
+  debug_package: !secret debug_package
   matrix_flip_x: "false"  # set to "true" if the matrix is mirrored left/right
   matrix_flip_y: "true"   # set to "true" if the matrix is mounted upside down
   led_pin: GPIO25   # WS2812B DATA: ESP32 GPIO25 → 470 Ω → LED DIN
@@ -21,6 +22,7 @@ packages:
   board: !include boards/esp32-cp2102.yaml
   base: !include common/base.yaml
   led: !include common/led_matrix.yaml
+  debug: !include ${debug_package}
   # light_sensor: !include common/light_sensor.yaml  # BH1750
   # mic: !include common/microphone.yaml             # INMP441
   # audio: !include common/audio.yaml                # MAX98357A
