@@ -21,6 +21,8 @@ void EffectFire2020::tick(MatrixCanvas& canvas, const Matrix& matrix,
                           const EffectParams& params, uint32_t) {
     uint8_t w = matrix.width();
     uint8_t h = matrix.height();
+    const Palette16& palette = palette_by_id(params.palette);
+    const int8_t rise = matrix.rise_direction();
 
     if (!initialized_) {
         initialized_  = true;
@@ -29,7 +31,7 @@ void EffectFire2020::tick(MatrixCanvas& canvas, const Matrix& matrix,
         step_         = map_int(255 - delta_value_, 87, 247, 4, 32);
         uint8_t num   = (uint8_t)(w / 8 < 1 ? 1 : w / 8);
         for (uint8_t i = 0; i < num && i < kMaxSparks; i++) {
-            spark_y_[i] = random8(h);
+            spark_y_[i] = (float)matrix.row_from_bottom(random8(4));
             spark_x_[i] = random8(w);
         }
     }
@@ -37,13 +39,14 @@ void EffectFire2020::tick(MatrixCanvas& canvas, const Matrix& matrix,
     // Render base flame using Perlin noise
     for (uint8_t x = 0; x < w; x++) {
         for (uint8_t y = 0; y < h; y++) {
-            uint8_t j     = h - 1 - y;                // noise row: 0=top, h-1=bottom
-            uint8_t shift = (uint8_t)((uint16_t)y * 255 / (h > 1 ? h - 1 : 1));
+            const uint8_t fy = matrix.height_from_bottom(y);  // 0=bottom, h-1=top
+            const uint8_t j = h - 1 - fy;                     // noise row: 0=top, h-1=bottom
+            const uint8_t shift = (uint8_t)((uint16_t)fy * 255 / (h > 1 ? h - 1 : 1));
             uint8_t n     = cylindrical_noise8(x, (uint8_t)j, w,
                                                delta_value_,
                                                (uint16_t)(ff_z_ + ff_y_ * delta_hue_));
             uint8_t idx = qsub8(n, shift);
-            canvas.set_pixel(matrix.xy(x, y), color_from_palette(kRainbowColors, idx, 255));
+            canvas.set_pixel(matrix.xy(x, y), color_from_palette(palette, idx, 255));
         }
     }
 
@@ -54,23 +57,25 @@ void EffectFire2020::tick(MatrixCanvas& canvas, const Matrix& matrix,
     for (uint8_t i = 0; i < num_sparks; i++) {
         uint8_t sx = (uint8_t)spark_x_[i];
         uint8_t sy = (uint8_t)spark_y_[i];
+        const uint8_t spark_height = matrix.height_from_bottom(sy);
 
-        if (sy > 3 && sy < h) {
-            // Recompute the flame color at row y=3, same column
-            uint8_t j3   = h - 1 - 3;
+        if (spark_height > 3 && spark_height < h) {
+            // Recompute the flame color three rows above the physical bottom.
+            const uint8_t sample_height = 3;
+            const uint8_t j3   = h - 1 - sample_height;
             uint8_t n3   = cylindrical_noise8(sx, (uint8_t)j3, w,
                                               delta_value_,
                                               (uint16_t)(ff_z_ + ff_y_ * delta_hue_));
-            uint8_t sh3  = (uint8_t)((uint16_t)3 * 255 / (h > 1 ? h - 1 : 1));
+            uint8_t sh3  = (uint8_t)((uint16_t)sample_height * 255 / (h > 1 ? h - 1 : 1));
             uint8_t idx3 = qsub8(n3, sh3);
-            uint8_t fade = (sy > 127) ? 255u : (uint8_t)(sy * 2u);
+            uint8_t fade = (spark_height > 127) ? 255u : (uint8_t)(spark_height * 2u);
             canvas.set_pixel(matrix.xy(sx, sy),
-                             color_from_palette(kRainbowColors, idx3, 255 - fade));
+                             color_from_palette(palette, idx3, 255 - fade));
         }
 
-        spark_y_[i] += 1.0f;
-        if (spark_y_[i] >= (float)h) {
-            spark_y_[i] = (float)random8(4);
+        spark_y_[i] += (float)rise;
+        if (!matrix.in_bounds_y((int16_t)spark_y_[i])) {
+            spark_y_[i] = (float)matrix.row_from_bottom(random8(4));
             spark_x_[i] = (float)random8(w);
         }
         if (!random8(step_))

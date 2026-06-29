@@ -15,6 +15,7 @@ void EffectTornado::tick(MatrixCanvas& canvas, const Matrix& matrix,
     uint16_t t1 = (uint16_t)((now_ms >> 3) * params.speed >> 8);
     uint16_t t2 = (uint16_t)((now_ms >> 1) * params.speed >> 8);
     uint8_t  layers = (params.scale >> 5) + 1;  // 1-8
+    const Palette16& palette = palette_by_id(params.palette);
 
     // Local additive buffer so layers blend together (zero-initialized)
     Rgb buf[256]{};
@@ -29,7 +30,7 @@ void EffectTornado::tick(MatrixCanvas& canvas, const Matrix& matrix,
             for (uint8_t j = 0; j < kWidths; j++) {
                 uint8_t bright = (j == 0) ? 255 : (kWidths - j) * 255 / (kWidths - 1);
                 uint8_t hue_idx = (uint8_t)((uint16_t)j * 255 / kWidths);
-                Rgb c = color_from_palette(kRainbowColors, hue_idx, bright);
+                Rgb c = color_from_palette(palette, hue_idx, bright);
 
                 auto place = [&](int16_t cx) {
                     Rgb& px = buf[matrix.xy_wrap(cx, y)];

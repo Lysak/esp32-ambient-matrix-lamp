@@ -3,6 +3,7 @@
 // Source: https://github.com/AlexGyver/GyverLamp2
 
 #include "ambient_matrix/effect_particles.h"
+#include "ambient_matrix/effect_color_source.h"
 #include "ambient_matrix/noise.h"
 #include "ambient_matrix/math_utils.h"
 #include "ambient_matrix/palette.h"
@@ -20,6 +21,7 @@ void EffectParticles::tick(MatrixCanvas& canvas, const Matrix& matrix,
     uint16_t n      = (uint16_t)w * h;
     uint8_t  amount = (params.scale >> 3) + 1;
     uint32_t t      = (uint32_t)(now_ms << 3) * params.speed >> 8;
+    const Palette16& palette = palette_by_id(params.palette);
 
     // Fade all pixels
     for (uint16_t i = 0; i < n; i++) fade_to_black(buf_[i], 70);
@@ -41,7 +43,7 @@ void EffectParticles::tick(MatrixCanvas& canvas, const Matrix& matrix,
 
         if (px >= 0 && px < (int16_t)h) {
             uint16_t idx = matrix.xy_wrap(py, (uint8_t)px);
-            buf_[idx] = color_from_palette(kRainbowColors, i * 255 / amount, 255);
+            buf_[idx] = indexed_effect_color(params, palette, i * 255 / amount);
         }
     }
 

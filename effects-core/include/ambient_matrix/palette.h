@@ -7,9 +7,21 @@ namespace ambient_matrix {
 
 using Palette16 = std::array<Rgb, 16>;
 
+enum class PaletteId : uint8_t {
+    Heat = 0,
+    Lava,
+    Party,
+    Rainbow,
+    RainbowStripe,
+    Cloud,
+    Ocean,
+    Forest,
+};
+
 // Interpolate within a 16-entry palette. index 0-255 spans the full palette.
 // brightness 255 = full brightness.
 Rgb color_from_palette(const Palette16& pal, uint8_t index, uint8_t brightness = 255);
+const Palette16& palette_by_id(PaletteId id);
 
 extern const Palette16 kHeatColors;
 extern const Palette16 kRainbowColors;

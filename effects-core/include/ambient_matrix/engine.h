@@ -1,6 +1,7 @@
 #pragma once
 #include "canvas.h"
 #include "matrix.h"
+#include "palette.h"
 #include <cstdint>
 #include <memory>
 
@@ -18,25 +19,14 @@ enum class EffectId : uint8_t {
     Perlin, Particles,
     Campfire, Fire, Fire2020,
     Confetti, Tornado,
-    // GyverLamp v1 originals
-    ColorChange,
-    RainbowVert,
-    RainbowHoriz,
-    Madness3D,
-    Clouds3D,
-    Lava3D,
-    Plasma3D,
-    Rainbow3D,
-    Peacock3D,
-    Zebra3D,
-    Forest3D,
-    Ocean3D,
 };
 
 struct EffectParams {
     uint8_t speed = 128;
     uint8_t scale = 128;
     uint8_t color = 0;   // base hue 0-255
+    PaletteId palette = PaletteId::Rainbow;
+    bool from_palette = false;
 };
 
 class Effect {

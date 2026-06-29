@@ -24,6 +24,20 @@ Rgb color_from_palette(const Palette16& pal, uint8_t index, uint8_t brightness) 
     return r;
 }
 
+const Palette16& palette_by_id(PaletteId id) {
+    switch (id) {
+        case PaletteId::Heat:          return kHeatColors;
+        case PaletteId::Lava:          return kLavaColors;
+        case PaletteId::Party:         return kPartyColors;
+        case PaletteId::Rainbow:       return kRainbowColors;
+        case PaletteId::RainbowStripe: return kRainbowStripeColors;
+        case PaletteId::Cloud:         return kCloudColors;
+        case PaletteId::Ocean:         return kOceanColors;
+        case PaletteId::Forest:        return kForestColors;
+    }
+    return kRainbowColors;
+}
+
 // Black -> dark red -> orange -> yellow -> white
 const Palette16 kHeatColors = {{
     {  0,  0,  0}, { 32,  0,  0}, { 64,  0,  0}, { 96,  0,  0},

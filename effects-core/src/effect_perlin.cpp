@@ -15,10 +15,11 @@ void EffectPerlin::tick(MatrixCanvas& canvas, const Matrix& matrix,
     uint16_t t    = (uint16_t)((now_ms >> 3) * params.speed >> 8);
 
     uint8_t w = matrix.width(), h = matrix.height();
+    const Palette16& palette = palette_by_id(params.palette);
     for (uint8_t y = 0; y < h; y++) {
         for (uint8_t x = 0; x < w; x++) {
             uint8_t n = cylindrical_noise8(x, y, w, step, t);
-            canvas.set_pixel(matrix.xy(x, y), color_from_palette(kRainbowColors, n, 255));
+            canvas.set_pixel(matrix.xy(x, y), color_from_palette(palette, n, 255));
         }
     }
 }

@@ -21,6 +21,31 @@ public:
             return (uint16_t)y * width_ + (width_ - 1 - x);
     }
 
+    bool in_bounds_y(int16_t y) const {
+        return y >= 0 && y < height_;
+    }
+
+    uint8_t bottom_y() const {
+        return flip_y_ ? height_ - 1 : 0;
+    }
+
+    uint8_t top_y() const {
+        return flip_y_ ? 0 : height_ - 1;
+    }
+
+    int8_t rise_direction() const {
+        return flip_y_ ? -1 : 1;
+    }
+
+    uint8_t row_from_bottom(uint8_t offset) const {
+        const int16_t row = (int16_t)bottom_y() + (int16_t)rise_direction() * offset;
+        return (uint8_t)(row < 0 ? 0 : (row >= height_ ? height_ - 1 : row));
+    }
+
+    uint8_t height_from_bottom(uint8_t y) const {
+        return flip_y_ ? (height_ - 1 - y) : y;
+    }
+
     uint8_t wrap_x(int16_t x) const {
         if (width_ == 0) return 0;
         x %= width_;

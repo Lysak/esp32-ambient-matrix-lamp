@@ -13,11 +13,12 @@ void EffectGradient::tick(MatrixCanvas& canvas, const Matrix& matrix,
     int8_t  dir    = (int8_t)params.speed - 128;
     uint8_t offset = (uint8_t)((int32_t)(now_ms >> 3) * dir >> 7);
     uint8_t h = matrix.height(), w = matrix.width();
+    const Palette16& palette = palette_by_id(params.palette);
 
     for (uint8_t y = 0; y < h; y++) {
         // scale controls gradient spread: higher scale = more color cycles
         uint8_t idx = (uint8_t)((uint16_t)y * (params.scale + 1) / h + offset);
-        Rgb c = color_from_palette(kRainbowColors, idx, 255);
+        Rgb c = color_from_palette(palette, idx, 255);
         for (uint8_t x = 0; x < w; x++) canvas.set_pixel(matrix.xy(x, y), c);
     }
 }

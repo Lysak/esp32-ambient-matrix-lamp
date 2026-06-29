@@ -68,6 +68,26 @@ static void test_vertical_flip_moves_origin_to_top_left_wiring() {
     assert(m.xy(15, 15) == 15);
 }
 
+static void test_vertical_helpers_follow_flip_state() {
+    Matrix normal(16, 16, false, false);
+    assert(normal.bottom_y() == 0);
+    assert(normal.top_y() == 15);
+    assert(normal.rise_direction() == 1);
+    assert(normal.row_from_bottom(0) == 0);
+    assert(normal.row_from_bottom(3) == 3);
+    assert(normal.height_from_bottom(0) == 0);
+    assert(normal.height_from_bottom(15) == 15);
+
+    Matrix flipped(16, 16, false, true);
+    assert(flipped.bottom_y() == 15);
+    assert(flipped.top_y() == 0);
+    assert(flipped.rise_direction() == -1);
+    assert(flipped.row_from_bottom(0) == 15);
+    assert(flipped.row_from_bottom(3) == 12);
+    assert(flipped.height_from_bottom(15) == 0);
+    assert(flipped.height_from_bottom(0) == 15);
+}
+
 int main() {
     test_bottom_left_is_index_zero();
     test_row0_left_to_right();
@@ -77,6 +97,7 @@ int main() {
     test_all_indices_in_bounds_16x16();
     test_cylindrical_x_wrap();
     test_vertical_flip_moves_origin_to_top_left_wiring();
+    test_vertical_helpers_follow_flip_state();
     printf("all tests passed\n");
     return 0;
 }

@@ -32,6 +32,7 @@ esphome:
   friendly_name: ${friendly_name}
   includes:
     - custom/adapter.h
+    - custom/brightness.h
     - custom/power_transition.h
     - custom/sunrise_renderer.h
     - custom/effect_prefs.h
@@ -46,6 +47,10 @@ esphome:
     then:
       - lambda: |-
           effect_prefs_load(id(current_effect).c_str());
+          id(lamp_effect).publish_state(id(current_effect));
           id(effect_speed).publish_state((float)g_effect_speed);
           id(effect_scale).publish_state((float)g_effect_scale);
+          id(effect_color).publish_state((float)g_effect_color);
+          id(effect_palette).publish_state(effect_palette_name(g_effect_palette));
+          id(effect_from_palette).publish_state(g_effect_from_palette != 0);
       - script.execute: run_power_on_transition
