@@ -2,6 +2,10 @@
 
 Ambient LED matrix lamp powered by ESP32-WROOM (CP2102 USB) and ESPHome.
 
+This repository pins ESPHome in `.esphome-version` and Python in `.esphome-python-version` to stay compatible with Home Assistant `2024.3.3` on a low-memory Orange Pi host. Do not run ad-hoc `esphome` or `uvx esphome ...` commands from this repo; use the `make` targets so the pinned toolchain is always applied.
+
+For compatibility with that older ESPHome line, the debug include is fixed at `esphome/common/debug_selected.yaml` instead of a dynamic include path from secrets.
+
 ---
 
 ## Hardware
@@ -69,14 +73,44 @@ On boot, the lamp powers on automatically with the last saved effect and the las
 Effect auto-rotation is disabled by default and exposed as a separate `Lamp Auto Rotate` switch in ESPHome / Home Assistant.
 When enabled, it advances to the next effect every 1 minute while the lamp is on.
 
+### Old-ESPHome compatibility note
+
+For ESPHome `2024.3.2`, the two template dropdowns were replaced with numeric entities because that older release does not handle the newer `template select` automations used by this project.
+
+- `Lamp Effect Index`: `0..8`
+- `Effect Palette Index`: `0..7`
+
+Lamp effect index mapping:
+
+- `0` = `Color`
+- `1` = `Color Shift`
+- `2` = `Gradient`
+- `3` = `Perlin`
+- `4` = `Particles`
+- `5` = `Fire`
+- `6` = `Fire 2020`
+- `7` = `Confetti`
+- `8` = `Tornado`
+
+Palette index mapping:
+
+- `0` = `Heat`
+- `1` = `Lava`
+- `2` = `Party`
+- `3` = `Rainbow`
+- `4` = `Rainbow Stripe`
+- `5` = `Cloud`
+- `6` = `Ocean`
+- `7` = `Forest`
+
 ---
 
 ## Prerequisites
 
-Install ESPHome CLI once:
+Install `uv` once, then use the repository `Makefile` targets:
 
 ```bash
-uv tool install esphome
+brew install uv
 ```
 
 Install the CP2102 USB driver if not already present:
@@ -94,6 +128,8 @@ Install the CP2102 USB driver if not already present:
 | `make test` | Run all unit tests |
 | `make preview` | Run Rainbow effect in terminal (Ctrl+C to stop) |
 | `make clean` | Remove build directory |
+| `make esphome-version` | Show the pinned ESPHome version used by this repo |
+| `make esphome-python-version` | Show the pinned Python version used for old ESPHome |
 | `make esphome-compile` | Validate ESPHome firmware (no device needed) |
 | `make esphome-flash` | Flash via OTA; uses `esphome/.device_ip` if present, otherwise mDNS |
 | `make esphome-flash DEVICE=/dev/tty.xxx` | Flash via USB serial |
@@ -132,13 +168,15 @@ make gen-api-key
 
 Paste the output into `api_encryption_key: "..."` in `secrets.yaml`.
 
-To expose the matrix orientation helper in Home Assistant, set:
+To expose the matrix orientation helper in Home Assistant, edit `esphome/common/debug_selected.yaml`.
+
+The default committed version already exposes the debug button. To disable it, replace the file contents with:
 
 ```yaml
-debug_package: common/debug_on.yaml
+{}
 ```
 
-This adds a config button named `Matrix Debug Corners` that turns on a
+When enabled, this adds a config button named `Matrix Debug Corners` that turns on a
 four-corner test pattern:
 
 - red `2x2`: `(0,0)`
@@ -164,7 +202,7 @@ ls /dev/tty.*       # look for /dev/tty.usbserial-* or /dev/ttyUSB0
 make esphome-flash DEVICE=/dev/tty.usbserial-XXXX
 ```
 
-ESPHome will compile the firmware, upload it via serial, then reboot the board.
+The pinned ESPHome + Python versions from `.esphome-version` and `.esphome-python-version` will compile the firmware, upload it via serial, then reboot the board.
 On first boot the device connects to Wi-Fi using the credentials from secrets.
 
 ---

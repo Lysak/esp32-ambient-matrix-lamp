@@ -11,6 +11,34 @@ inline uint8_t g_effect_color = 0;
 inline uint8_t g_effect_palette = 3;  // Rainbow
 inline uint8_t g_effect_from_palette = 0;
 
+inline const char* effect_name(uint8_t id) {
+    switch (id) {
+        case 0: return "Color";
+        case 1: return "Color Shift";
+        case 2: return "Gradient";
+        case 3: return "Perlin";
+        case 4: return "Particles";
+        case 5: return "Fire";
+        case 6: return "Fire 2020";
+        case 7: return "Confetti";
+        case 8: return "Tornado";
+        default: return "Color";
+    }
+}
+
+inline uint8_t effect_id(const std::string& name) {
+    if (name == "Color") return 0;
+    if (name == "Color Shift") return 1;
+    if (name == "Gradient") return 2;
+    if (name == "Perlin") return 3;
+    if (name == "Particles") return 4;
+    if (name == "Fire") return 5;
+    if (name == "Fire 2020") return 6;
+    if (name == "Confetti") return 7;
+    if (name == "Tornado") return 8;
+    return 0;
+}
+
 // Derive a stable NVS key from an effect name.
 // Rule: first 13 chars, lowercase, spaces→'_', then '_x'. Max 15 chars.
 inline void effect_prefs_key(const char* name, char suffix, char* out) {

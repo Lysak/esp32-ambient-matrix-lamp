@@ -4,6 +4,16 @@
 #include "palette.h"
 #include <cstdint>
 #include <memory>
+#include <utility>
+
+#if __cplusplus < 201402L
+namespace std {
+template <typename T, typename... Args>
+inline unique_ptr<T> make_unique(Args&&... args) {
+    return unique_ptr<T>(new T(std::forward<Args>(args)...));
+}
+}  // namespace std
+#endif
 
 namespace ambient_matrix {
 
@@ -22,6 +32,18 @@ enum class EffectId : uint8_t {
 };
 
 struct EffectParams {
+    constexpr EffectParams() = default;
+    constexpr EffectParams(uint8_t speed,
+                           uint8_t scale,
+                           uint8_t color,
+                           PaletteId palette = PaletteId::Rainbow,
+                           bool from_palette = false)
+        : speed(speed),
+          scale(scale),
+          color(color),
+          palette(palette),
+          from_palette(from_palette) {}
+
     uint8_t speed = 128;
     uint8_t scale = 128;
     uint8_t color = 0;   // base hue 0-255

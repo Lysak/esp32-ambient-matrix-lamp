@@ -22,7 +22,7 @@ packages:
   board: !include boards/esp32-cp2102.yaml
   base: !include common/base.yaml
   led: !include common/led_matrix.yaml
-  debug: !include ${debug_package}
+  debug: !include common/debug_selected.yaml
   # light_sensor: !include common/light_sensor.yaml  # BH1750
   # mic: !include common/microphone.yaml             # INMP441
   # audio: !include common/audio.yaml                # MAX98357A
@@ -40,17 +40,20 @@ esphome:
     - effects-core
   platformio_options:
     lib_extra_dirs: !secret project_root
-  # Auto-start on power-up without Home Assistant: restore the saved brightness
-  # level within the hard 33% global power ceiling.
+  # Restore the last manual power state on boot instead of forcing the lamp on.
   on_boot:
     priority: -100
     then:
       - lambda: |-
           effect_prefs_load(id(current_effect).c_str());
-          id(lamp_effect).publish_state(id(current_effect));
+          id(lamp_effect).publish_state((float)effect_id(id(current_effect)));
           id(effect_speed).publish_state((float)g_effect_speed);
           id(effect_scale).publish_state((float)g_effect_scale);
           id(effect_color).publish_state((float)g_effect_color);
-          id(effect_palette).publish_state(effect_palette_name(g_effect_palette));
+          id(effect_palette).publish_state((float)g_effect_palette);
           id(effect_from_palette).publish_state(g_effect_from_palette != 0);
-      - script.execute: run_power_on_transition
+      - if:
+          condition:
+            lambda: return id(lamp_powered);
+          then:
+            - script.execute: run_power_on_transition

@@ -4,8 +4,8 @@ globals:
   # power never resets the selected effect.
   - id: lamp_powered
     type: bool
-    restore_value: false
-    initial_value: 'true'
+    restore_value: true
+    initial_value: 'false'
   - id: last_toggle_ms
     type: uint32_t
     restore_value: false
@@ -212,96 +212,53 @@ switch:
                             g_effect_palette,
                             g_effect_from_palette);
 
-select:
+number:
   - platform: template
     id: lamp_effect
-    name: "Lamp Effect"
-    options:
-      # GyverLamp2 originals
-      - "Color"
-      - "Color Shift"
-      - "Gradient"
-      - "Perlin"
-      - "Particles"
-      - "Fire"
-      - "Fire 2020"
-      - "Confetti"
-      - "Tornado"
-      # Custom effects
-      - "Rainbow 2"
-      - "Color Scanner 2"
-      - "Blue Scanner 2"
-      - "Plasma 2"
-      - "Aurora 2"
-      - "Neon Rings 2"
-      - "Kaleidoscope 2"
-      - "Digital Rain 2"
-      - "Comet Shower 2"
-      - "Starfield 2"
-      - "Cosmic Nebula 2"
-      - "Wormhole 2"
-      - "Orbital Dance 2"
-      - "Solar Storm 2"
-      - "Pulsar 2"
-      - "Starry Sky 2"
-      - "Asteroid Impact 2"
-      - "Pac-Man Orbit 2"
-      - "Space Police 2"
-      - "Purple Meteor Shower 2"
-      - "Light Speed 2"
-      - "Supernova 2"
-      - "Flight to Mars 2"
-      - "Singularity 2"
-      - "Relic Radiation 2"
-      - "Ocean Waves 2"
-      - "Lava Lamp 2"
-      - "Campfire 2"
+    name: "Lamp Effect Index"
+    min_value: 0
+    max_value: 8
+    step: 1
     lambda: |-
-      return id(current_effect);
+      return effect_id(id(current_effect));
     set_action:
       - lambda: |-
+          const auto index = static_cast<uint8_t>(x);
           id(sunrise_active) = false;
           id(power_transition_active) = false;
-          id(current_effect) = x;
+          id(current_effect) = effect_name(index);
           id(lamp_powered) = true;
-          effect_prefs_load(x.c_str());
+          effect_prefs_load(id(current_effect).c_str());
           id(effect_speed).publish_state((float)g_effect_speed);
           id(effect_scale).publish_state((float)g_effect_scale);
           id(effect_color).publish_state((float)g_effect_color);
-          id(effect_palette).publish_state(effect_palette_name(g_effect_palette));
+          id(effect_palette).publish_state((float)g_effect_palette);
           id(effect_from_palette).publish_state(g_effect_from_palette != 0);
-          id(lamp_effect).publish_state(id(current_effect));
+          id(lamp_effect).publish_state((float)index);
       - light.turn_on:
           id: led_matrix
-          effect: !lambda return x;
+          effect: !lambda return id(current_effect);
 
   - platform: template
     id: effect_palette
-    name: "Effect Palette"
+    name: "Effect Palette Index"
     entity_category: config
-    options:
-      - "Heat"
-      - "Lava"
-      - "Party"
-      - "Rainbow"
-      - "Rainbow Stripe"
-      - "Cloud"
-      - "Ocean"
-      - "Forest"
+    min_value: 0
+    max_value: 7
+    step: 1
     lambda: |-
-      return std::string(effect_palette_name(g_effect_palette));
+      return g_effect_palette;
     set_action:
       - lambda: |-
-          g_effect_palette = effect_palette_id(x);
+          g_effect_palette = static_cast<uint8_t>(x);
           effect_prefs_save(id(current_effect).c_str(),
                             g_effect_speed,
                             g_effect_scale,
                             g_effect_color,
                             g_effect_palette,
                             g_effect_from_palette);
-          id(effect_palette).publish_state(x);
+          id(effect_palette).publish_state((float)g_effect_palette);
 
-number:
   - platform: template
     id: lamp_brightness
     name: "Lamp Brightness"
@@ -357,6 +314,160 @@ number:
           id(sunrise_max_level) = (int)x;
 
   - platform: template
+    id: sunrise_sunday_hour
+    name: "Sunrise Sunday Hour"
+    entity_category: config
+    min_value: 0
+    max_value: 23
+    step: 1
+    restore_value: true
+    optimistic: true
+    initial_value: 7
+
+  - platform: template
+    id: sunrise_sunday_minute
+    name: "Sunrise Sunday Minute"
+    entity_category: config
+    min_value: 0
+    max_value: 59
+    step: 1
+    restore_value: true
+    optimistic: true
+    initial_value: 0
+
+  - platform: template
+    id: sunrise_monday_hour
+    name: "Sunrise Monday Hour"
+    entity_category: config
+    min_value: 0
+    max_value: 23
+    step: 1
+    restore_value: true
+    optimistic: true
+    initial_value: 7
+
+  - platform: template
+    id: sunrise_monday_minute
+    name: "Sunrise Monday Minute"
+    entity_category: config
+    min_value: 0
+    max_value: 59
+    step: 1
+    restore_value: true
+    optimistic: true
+    initial_value: 0
+
+  - platform: template
+    id: sunrise_tuesday_hour
+    name: "Sunrise Tuesday Hour"
+    entity_category: config
+    min_value: 0
+    max_value: 23
+    step: 1
+    restore_value: true
+    optimistic: true
+    initial_value: 7
+
+  - platform: template
+    id: sunrise_tuesday_minute
+    name: "Sunrise Tuesday Minute"
+    entity_category: config
+    min_value: 0
+    max_value: 59
+    step: 1
+    restore_value: true
+    optimistic: true
+    initial_value: 0
+
+  - platform: template
+    id: sunrise_wednesday_hour
+    name: "Sunrise Wednesday Hour"
+    entity_category: config
+    min_value: 0
+    max_value: 23
+    step: 1
+    restore_value: true
+    optimistic: true
+    initial_value: 7
+
+  - platform: template
+    id: sunrise_wednesday_minute
+    name: "Sunrise Wednesday Minute"
+    entity_category: config
+    min_value: 0
+    max_value: 59
+    step: 1
+    restore_value: true
+    optimistic: true
+    initial_value: 0
+
+  - platform: template
+    id: sunrise_thursday_hour
+    name: "Sunrise Thursday Hour"
+    entity_category: config
+    min_value: 0
+    max_value: 23
+    step: 1
+    restore_value: true
+    optimistic: true
+    initial_value: 7
+
+  - platform: template
+    id: sunrise_thursday_minute
+    name: "Sunrise Thursday Minute"
+    entity_category: config
+    min_value: 0
+    max_value: 59
+    step: 1
+    restore_value: true
+    optimistic: true
+    initial_value: 0
+
+  - platform: template
+    id: sunrise_friday_hour
+    name: "Sunrise Friday Hour"
+    entity_category: config
+    min_value: 0
+    max_value: 23
+    step: 1
+    restore_value: true
+    optimistic: true
+    initial_value: 7
+
+  - platform: template
+    id: sunrise_friday_minute
+    name: "Sunrise Friday Minute"
+    entity_category: config
+    min_value: 0
+    max_value: 59
+    step: 1
+    restore_value: true
+    optimistic: true
+    initial_value: 0
+
+  - platform: template
+    id: sunrise_saturday_hour
+    name: "Sunrise Saturday Hour"
+    entity_category: config
+    min_value: 0
+    max_value: 23
+    step: 1
+    restore_value: true
+    optimistic: true
+    initial_value: 7
+
+  - platform: template
+    id: sunrise_saturday_minute
+    name: "Sunrise Saturday Minute"
+    entity_category: config
+    min_value: 0
+    max_value: 59
+    step: 1
+    restore_value: true
+    optimistic: true
+    initial_value: 0
+
+  - platform: template
     id: effect_speed
     name: "Effect Speed"
     entity_category: config
@@ -410,64 +521,6 @@ number:
                             g_effect_palette,
                             g_effect_from_palette);
 
-datetime:
-  - platform: template
-    id: sunrise_sunday_time
-    type: time
-    name: "Sunrise Sunday Time"
-    entity_category: config
-    optimistic: true
-    restore_value: true
-    initial_value: "07:00:00"
-  - platform: template
-    id: sunrise_monday_time
-    type: time
-    name: "Sunrise Monday Time"
-    entity_category: config
-    optimistic: true
-    restore_value: true
-    initial_value: "07:00:00"
-  - platform: template
-    id: sunrise_tuesday_time
-    type: time
-    name: "Sunrise Tuesday Time"
-    entity_category: config
-    optimistic: true
-    restore_value: true
-    initial_value: "07:00:00"
-  - platform: template
-    id: sunrise_wednesday_time
-    type: time
-    name: "Sunrise Wednesday Time"
-    entity_category: config
-    optimistic: true
-    restore_value: true
-    initial_value: "07:00:00"
-  - platform: template
-    id: sunrise_thursday_time
-    type: time
-    name: "Sunrise Thursday Time"
-    entity_category: config
-    optimistic: true
-    restore_value: true
-    initial_value: "07:00:00"
-  - platform: template
-    id: sunrise_friday_time
-    type: time
-    name: "Sunrise Friday Time"
-    entity_category: config
-    optimistic: true
-    restore_value: true
-    initial_value: "07:00:00"
-  - platform: template
-    id: sunrise_saturday_time
-    type: time
-    name: "Sunrise Saturday Time"
-    entity_category: config
-    optimistic: true
-    restore_value: true
-    initial_value: "07:00:00"
-
 time:
   - platform: homeassistant
     id: homeassistant_time
@@ -479,8 +532,7 @@ time:
         then:
           - script.execute: check_sunrise_schedule
 
-# Rotate forever while the lamp is on. cycle: true wraps the final effect back
-# to Rainbow instead of stopping at the end of the options list.
+# Rotate forever while the lamp is on by reusing the same next-effect script.
 interval:
   - interval: 1min
     then:
@@ -488,9 +540,7 @@ interval:
           condition:
             lambda: return id(lamp_powered) && id(lamp_auto_rotate).state;
           then:
-            - select.next:
-                id: lamp_effect
-                cycle: true
+            - script.execute: button_next_effect
   - interval: 1s
     then:
       - if:
@@ -522,13 +572,13 @@ script:
 
           auto get_day_config = [&](uint8_t day) -> DayConfig {
             switch (day) {
-              case 1: return {id(sunrise_sunday_enabled).state, id(sunrise_sunday_time).hour, id(sunrise_sunday_time).minute};
-              case 2: return {id(sunrise_monday_enabled).state, id(sunrise_monday_time).hour, id(sunrise_monday_time).minute};
-              case 3: return {id(sunrise_tuesday_enabled).state, id(sunrise_tuesday_time).hour, id(sunrise_tuesday_time).minute};
-              case 4: return {id(sunrise_wednesday_enabled).state, id(sunrise_wednesday_time).hour, id(sunrise_wednesday_time).minute};
-              case 5: return {id(sunrise_thursday_enabled).state, id(sunrise_thursday_time).hour, id(sunrise_thursday_time).minute};
-              case 6: return {id(sunrise_friday_enabled).state, id(sunrise_friday_time).hour, id(sunrise_friday_time).minute};
-              case 7: return {id(sunrise_saturday_enabled).state, id(sunrise_saturday_time).hour, id(sunrise_saturday_time).minute};
+              case 1: return {id(sunrise_sunday_enabled).state, (int) id(sunrise_sunday_hour).state, (int) id(sunrise_sunday_minute).state};
+              case 2: return {id(sunrise_monday_enabled).state, (int) id(sunrise_monday_hour).state, (int) id(sunrise_monday_minute).state};
+              case 3: return {id(sunrise_tuesday_enabled).state, (int) id(sunrise_tuesday_hour).state, (int) id(sunrise_tuesday_minute).state};
+              case 4: return {id(sunrise_wednesday_enabled).state, (int) id(sunrise_wednesday_hour).state, (int) id(sunrise_wednesday_minute).state};
+              case 5: return {id(sunrise_thursday_enabled).state, (int) id(sunrise_thursday_hour).state, (int) id(sunrise_thursday_minute).state};
+              case 6: return {id(sunrise_friday_enabled).state, (int) id(sunrise_friday_hour).state, (int) id(sunrise_friday_minute).state};
+              case 7: return {id(sunrise_saturday_enabled).state, (int) id(sunrise_saturday_hour).state, (int) id(sunrise_saturday_minute).state};
               default: return {false, 0, 0};
             }
           };
@@ -628,7 +678,7 @@ script:
       - light.turn_on:
           id: led_matrix
           brightness: !lambda return lamp_brightness_fraction(id(lamp_brightness_level));
-          effect: "Power Helix"
+          effect: "On/Off: Power Helix"
       - delay: 900ms
       - if:
           condition:
@@ -652,7 +702,7 @@ script:
       - light.turn_on:
           id: led_matrix
           brightness: !lambda return lamp_brightness_fraction(id(lamp_brightness_level));
-          effect: "Power Helix"
+          effect: "On/Off: Power Helix"
       - delay: 900ms
       - lambda: |-
           id(power_transition_active) = false;
@@ -664,16 +714,7 @@ script:
       - lambda: |-
           static const char *const effects[] = {
               "Color", "Color Shift", "Gradient", "Perlin", "Particles",
-              "Fire", "Fire 2020", "Confetti", "Tornado", "Rainbow 2",
-              "Color Scanner 2", "Blue Scanner 2", "Plasma 2", "Aurora 2",
-              "Neon Rings 2", "Kaleidoscope 2", "Digital Rain 2",
-              "Comet Shower 2", "Starfield 2", "Cosmic Nebula 2",
-              "Wormhole 2", "Orbital Dance 2", "Solar Storm 2", "Pulsar 2",
-              "Starry Sky 2", "Asteroid Impact 2", "Pac-Man Orbit 2",
-              "Space Police 2", "Purple Meteor Shower 2", "Light Speed 2",
-              "Supernova 2", "Flight to Mars 2", "Singularity 2",
-              "Relic Radiation 2", "Ocean Waves 2", "Lava Lamp 2",
-              "Campfire 2",
+              "Fire", "Fire 2020", "Confetti", "Tornado",
           };
           constexpr size_t effect_count = sizeof(effects) / sizeof(effects[0]);
           size_t index = 0;
@@ -689,9 +730,9 @@ script:
           id(effect_speed).publish_state((float) g_effect_speed);
           id(effect_scale).publish_state((float) g_effect_scale);
           id(effect_color).publish_state((float) g_effect_color);
-          id(effect_palette).publish_state(effect_palette_name(g_effect_palette));
+          id(effect_palette).publish_state((float) g_effect_palette);
           id(effect_from_palette).publish_state(g_effect_from_palette != 0);
-          id(lamp_effect).publish_state(id(current_effect));
+          id(lamp_effect).publish_state((float) effect_id(id(current_effect)));
       - if:
           condition:
             lambda: return id(lamp_powered);
@@ -706,16 +747,7 @@ script:
       - lambda: |-
           static const char *const effects[] = {
               "Color", "Color Shift", "Gradient", "Perlin", "Particles",
-              "Fire", "Fire 2020", "Confetti", "Tornado", "Rainbow 2",
-              "Color Scanner 2", "Blue Scanner 2", "Plasma 2", "Aurora 2",
-              "Neon Rings 2", "Kaleidoscope 2", "Digital Rain 2",
-              "Comet Shower 2", "Starfield 2", "Cosmic Nebula 2",
-              "Wormhole 2", "Orbital Dance 2", "Solar Storm 2", "Pulsar 2",
-              "Starry Sky 2", "Asteroid Impact 2", "Pac-Man Orbit 2",
-              "Space Police 2", "Purple Meteor Shower 2", "Light Speed 2",
-              "Supernova 2", "Flight to Mars 2", "Singularity 2",
-              "Relic Radiation 2", "Ocean Waves 2", "Lava Lamp 2",
-              "Campfire 2",
+              "Fire", "Fire 2020", "Confetti", "Tornado",
           };
           constexpr size_t effect_count = sizeof(effects) / sizeof(effects[0]);
           size_t index = 0;
@@ -731,9 +763,9 @@ script:
           id(effect_speed).publish_state((float) g_effect_speed);
           id(effect_scale).publish_state((float) g_effect_scale);
           id(effect_color).publish_state((float) g_effect_color);
-          id(effect_palette).publish_state(effect_palette_name(g_effect_palette));
+          id(effect_palette).publish_state((float) g_effect_palette);
           id(effect_from_palette).publish_state(g_effect_from_palette != 0);
-          id(lamp_effect).publish_state(id(current_effect));
+          id(lamp_effect).publish_state((float) effect_id(id(current_effect)));
       - if:
           condition:
             lambda: return id(lamp_powered);
@@ -751,9 +783,9 @@ script:
           id(effect_speed).publish_state((float) g_effect_speed);
           id(effect_scale).publish_state((float) g_effect_scale);
           id(effect_color).publish_state((float) g_effect_color);
-          id(effect_palette).publish_state(effect_palette_name(g_effect_palette));
+          id(effect_palette).publish_state((float) g_effect_palette);
           id(effect_from_palette).publish_state(g_effect_from_palette != 0);
-          id(lamp_effect).publish_state(id(current_effect));
+          id(lamp_effect).publish_state((float) effect_id(id(current_effect)));
       - if:
           condition:
             lambda: return id(lamp_powered);
@@ -765,7 +797,9 @@ script:
   - id: click_handler
     mode: restart
     then:
-      - delay: 1200ms
+      # Multi-click decision window. We wait longer before executing the
+      # action so slower double/triple taps are not misread as a single click.
+      - delay: 2000ms
       - if:
           condition:
             lambda: return id(click_count) == 1;
@@ -848,6 +882,7 @@ light:
     name: "Ambient Matrix Lamp"
     internal: true
     pin: ${led_pin}
+    rmt_channel: 0
     num_leds: 256
     chipset: WS2812
     rgb_order: GRB
@@ -857,8 +892,10 @@ light:
     # roughly 33% of raw LED output, keeping PSU load within budget.
     color_correct: [0.33, 0.33, 0.33]
     effects:
+      # Internal-only effects remain in firmware, but are intentionally omitted
+      # from the user-facing effect list and button cycle.
       - addressable_lambda:
-          name: "Power Helix"
+          name: "On/Off: Power Helix"
           update_interval: 30ms
           lambda: |-
             static const ambient_matrix::Matrix matrix(16, 16, ${matrix_flip_x}, ${matrix_flip_y});

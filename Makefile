@@ -1,6 +1,9 @@
 BUILD_DIR := build
 CXX       := clang++
 CXXFLAGS  := -std=c++17 -Ieffects-core/include
+ESPHOME_VERSION := $(strip $(shell cat .esphome-version))
+ESPHOME_PYTHON_VERSION := $(strip $(shell cat .esphome-python-version))
+ESPHOME := uv run --python $(ESPHOME_PYTHON_VERSION) --with esphome==$(ESPHOME_VERSION) --with "setuptools<81" python -m esphome
 
 CORE_SRCS := \
     effects-core/src/matrix.cpp \
@@ -33,6 +36,8 @@ help:
 	@echo "preview         run Rainbow effect in terminal (Ctrl+C to stop)"
 	@echo "clean           remove build directory"
 	@echo "esphome-clean   remove ESPHome build artifacts"
+	@echo "esphome-version show pinned ESPHome version for HA compatibility"
+	@echo "esphome-python-version show pinned Python version for old ESPHome"
 	@echo "esphome-compile validate ESPHome firmware (no device needed)"
 	@echo "esphome-flash   clean, compile, then flash via USB (DEVICE=/dev/tty.xxx) or OTA"
 	@echo "esphome-logs    stream device logs via USB or network"
@@ -42,6 +47,12 @@ help:
 
 gen-api-key:
 	@python3 -c "import base64, os; print(base64.b64encode(os.urandom(32)).decode())"
+
+esphome-version:
+	@echo $(ESPHOME_VERSION)
+
+esphome-python-version:
+	@echo $(ESPHOME_PYTHON_VERSION)
 
 build: $(BUILD_DIR)/preview $(BUILD_DIR)/test_xy_mapping
 
@@ -70,15 +81,15 @@ esphome-clean:
 DEVICE ?=
 
 esphome-compile:
-	cd esphome && uvx esphome compile ambient_matrix_esp32.yaml
+	cd esphome && $(ESPHOME) compile ambient_matrix_esp32.yaml
 
 esphome-upload:
-	cd esphome && uvx esphome upload ambient_matrix_esp32.yaml $(if $(DEVICE),--device $(DEVICE),)
+	cd esphome && $(ESPHOME) upload ambient_matrix_esp32.yaml $(if $(DEVICE),--device $(DEVICE),)
 
 esphome-flash: esphome-clean esphome-compile esphome-upload
 
 esphome-logs:
-	cd esphome && uvx esphome logs ambient_matrix_esp32.yaml $(if $(DEVICE),--device $(DEVICE),)
+	cd esphome && $(ESPHOME) logs ambient_matrix_esp32.yaml $(if $(DEVICE),--device $(DEVICE),)
 
 esphome-rebuild: esphome-clean esphome-compile
 
