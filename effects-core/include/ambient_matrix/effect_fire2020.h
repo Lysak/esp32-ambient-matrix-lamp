@@ -1,4 +1,5 @@
 #pragma once
+#include "animation.h"
 #include "engine.h"
 
 namespace ambient_matrix {
@@ -22,6 +23,8 @@ private:
     uint8_t  delta_hue_   = 32;
     uint8_t  step_        = 16;
     bool     initialized_ = false;
+    AnimationClock clock_;
+    FixedStep stepper_{30};
 };
 
 } // namespace ambient_matrix

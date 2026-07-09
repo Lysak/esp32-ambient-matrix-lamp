@@ -11,9 +11,12 @@ namespace ambient_matrix {
 
 void EffectTornado::tick(MatrixCanvas& canvas, const Matrix& matrix,
                          const EffectParams& params, uint32_t now_ms) {
+    const FrameInfo frame = clock_.tick(now_ms);
     uint8_t w = matrix.width(), h = matrix.height();
-    uint16_t t1 = (uint16_t)((now_ms >> 3) * params.speed >> 8);
-    uint16_t t2 = (uint16_t)((now_ms >> 1) * params.speed >> 8);
+    phase_slow_.advance_linear16(frame, params.speed, 2048);
+    phase_fast_.advance_linear16(frame, params.speed, 512);
+    const uint16_t t1 = phase_slow_.word();
+    const uint16_t t2 = phase_fast_.word();
     uint8_t  layers = (params.scale >> 5) + 1;  // 1-8
     const Palette16& palette = palette_by_id(params.palette);
 

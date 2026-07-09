@@ -11,33 +11,38 @@
 namespace ambient_matrix {
 
 void EffectConfetti::reset() {
+    clock_.reset();
+    stepper_.reset();
     memset(buf_, 0, sizeof(buf_));
 }
 
 void EffectConfetti::tick(MatrixCanvas& canvas, const Matrix& matrix,
-                          const EffectParams& params, uint32_t) {
+                          const EffectParams& params, uint32_t now_ms) {
+    const FrameInfo frame = clock_.tick(now_ms);
+    const uint8_t steps = stepper_.consume(frame, 6);
     uint16_t n      = (uint16_t)matrix.width() * matrix.height();
     uint8_t  amount = (params.scale >> 3) + 1;
     uint8_t  fade   = params.speed / 2 + 1;
     const Palette16& palette = palette_by_id(params.palette);
 
-    // Spawn new sparks on dark pixels
-    for (uint8_t i = 0; i < amount; i++) {
-        uint16_t pos = (uint32_t)random8() * n >> 8;
-        Rgb& px = buf_[pos];
-        if (px.r < 10 && px.g < 10 && px.b < 10)
-            px = indexed_effect_color(params, palette, i * 255 / amount);
+    for (uint8_t step = 0; step < steps; step++) {
+        for (uint8_t i = 0; i < amount; i++) {
+            uint16_t pos = (uint32_t)random8() * n >> 8;
+            Rgb& px = buf_[pos];
+            if (px.r < 10 && px.g < 10 && px.b < 10)
+                px = indexed_effect_color(params, palette, i * 255 / amount);
+        }
+
+        for (uint16_t i = 0; i < n; i++) {
+            Rgb& px = buf_[i];
+            if (px.r >= 10 || px.g >= 10 || px.b >= 10)
+                fade_to_black(px, fade);
+            else
+                px = {};
+        }
     }
 
-    // Fade and write to canvas
-    for (uint16_t i = 0; i < n; i++) {
-        Rgb& px = buf_[i];
-        if (px.r >= 10 || px.g >= 10 || px.b >= 10)
-            fade_to_black(px, fade);
-        else
-            px = {};
-        canvas.set_pixel(i, px);
-    }
+    for (uint16_t i = 0; i < n; i++) canvas.set_pixel(i, buf_[i]);
 }
 
 } // namespace ambient_matrix

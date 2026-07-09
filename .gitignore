@@ -1,5 +1,6 @@
 .idea
 build/
+build-cmake/
 .esphome/
 esphome/secrets.yaml
 .DS_Store

@@ -16,6 +16,7 @@ float clamp01(float value) {
 
 void EffectScanner::tick(MatrixCanvas& canvas, const Matrix& matrix,
                          const EffectParams&, uint32_t now_ms) {
+    const FrameInfo frame = clock_.tick(now_ms);
     const uint8_t w = matrix.width();
     const uint8_t h = matrix.height();
     if (w == 0 || h == 0) return;
@@ -23,7 +24,7 @@ void EffectScanner::tick(MatrixCanvas& canvas, const Matrix& matrix,
     // Cubic easing reaches zero velocity at both ends, avoiding a hard bounce.
     static constexpr uint32_t kCycleMs = 4800;
     static constexpr uint32_t kHalfCycleMs = kCycleMs / 2;
-    const uint32_t phase = now_ms % kCycleMs;
+    const uint32_t phase = frame.total_ms % kCycleMs;
     const float t = (float)(phase % kHalfCycleMs) / (float)kHalfCycleMs;
     const float eased = t * t * (3.0f - 2.0f * t);
     const float normalized_y = phase < kHalfCycleMs ? 1.0f - eased : eased;
@@ -33,10 +34,10 @@ void EffectScanner::tick(MatrixCanvas& canvas, const Matrix& matrix,
         static constexpr float kTau = 6.28318531f;
         const float angle = kTau * x / w;
         const uint8_t texture = (uint8_t)(225 + 30
-            * (0.5f + 0.5f * std::sin(angle * 3.0f + now_ms * 0.0015f)));
+            * (0.5f + 0.5f * std::sin(angle * 3.0f + frame.total_s() * 1.5f)));
         const uint8_t hue = blue_only_
-            ? (uint8_t)(160 + std::sin(angle + now_ms * 0.001f) * 12.0f)
-            : (uint8_t)(now_ms / 18 + (uint16_t)x * 256 / w);
+            ? (uint8_t)(160 + std::sin(angle + frame.total_s()) * 12.0f)
+            : (uint8_t)(frame.total_ms / 18 + (uint16_t)x * 256 / w);
 
         for (uint8_t y = 0; y < h; y++) {
             const float distance = y > center_y ? y - center_y : center_y - y;

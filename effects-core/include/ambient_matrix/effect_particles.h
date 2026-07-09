@@ -1,4 +1,5 @@
 #pragma once
+#include "animation.h"
 #include "engine.h"
 #include "types.h"
 
@@ -12,6 +13,9 @@ public:
     void tick(MatrixCanvas&, const Matrix&, const EffectParams&, uint32_t now_ms) override;
 
 private:
+    AnimationClock clock_;
+    PhaseAccumulator drift_phase_;
+    PhaseAccumulator jitter_phase_;
     Rgb buf_[256]{};
 };
 

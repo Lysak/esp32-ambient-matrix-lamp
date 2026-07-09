@@ -16,6 +16,7 @@
 #include "ambient_matrix/effect_fire2020.h"
 #include "ambient_matrix/effect_confetti.h"
 #include "ambient_matrix/effect_tornado.h"
+#include "ambient_matrix/effect_benchmark.h"
 
 namespace ambient_matrix {
 
@@ -59,7 +60,10 @@ void EffectEngine::set_effect(EffectId id) {
         case EffectId::Fire:       effect_ = std::make_unique<EffectFire>();       break;
         case EffectId::Fire2020:   effect_ = std::make_unique<EffectFire2020>();   break;
         case EffectId::Confetti:   effect_ = std::make_unique<EffectConfetti>();   break;
-        case EffectId::Tornado:    effect_ = std::make_unique<EffectTornado>();    break;
+        case EffectId::Tornado:         effect_ = std::make_unique<EffectTornado>();    break;
+        case EffectId::BenchmarkCircle: effect_ = std::make_unique<EffectBenchmark>(BenchmarkStyle::Circle); break;
+        case EffectId::BenchmarkBall:   effect_ = std::make_unique<EffectBenchmark>(BenchmarkStyle::Ball);   break;
+        case EffectId::BenchmarkSine:   effect_ = std::make_unique<EffectBenchmark>(BenchmarkStyle::Sine);   break;
     }
     if (effect_) effect_->reset();
 }

@@ -29,6 +29,7 @@ enum class EffectId : uint8_t {
     Perlin, Particles,
     Campfire, Fire, Fire2020,
     Confetti, Tornado,
+    BenchmarkCircle, BenchmarkBall, BenchmarkSine,
 };
 
 struct EffectParams {

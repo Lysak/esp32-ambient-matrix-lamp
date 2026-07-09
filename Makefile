@@ -26,9 +26,10 @@ CORE_SRCS := \
     effects-core/src/effect_fire.cpp \
     effects-core/src/effect_fire2020.cpp \
     effects-core/src/effect_confetti.cpp \
-    effects-core/src/effect_tornado.cpp
+    effects-core/src/effect_tornado.cpp \
+    effects-core/src/effect_benchmark.cpp
 
-.PHONY: build test preview clean esphome-clean esphome-compile esphome-flash esphome-upload esphome-logs esphome-rebuild esphome-reflash gen-api-key help
+.PHONY: build test preview clean esphome-clean esphome-compile esphome-flash esphome-upload esphome-logs logs esphome-rebuild esphome-reflash gen-api-key help
 
 help:
 	@echo "build           compile preview + tests"
@@ -41,6 +42,7 @@ help:
 	@echo "esphome-compile validate ESPHome firmware (no device needed)"
 	@echo "esphome-flash   clean, compile, then flash via USB (DEVICE=/dev/tty.xxx) or OTA"
 	@echo "esphome-logs    stream device logs via USB or network"
+	@echo "logs            stream only touch-button and click-handler debug logs"
 	@echo "esphome-rebuild clean ESPHome build artifacts, then compile"
 	@echo "esphome-reflash clean ESPHome build artifacts, compile, then flash"
 	@echo "gen-api-key     generate a random ESPHome API encryption key"
@@ -90,6 +92,10 @@ esphome-flash: esphome-clean esphome-compile esphome-upload
 
 esphome-logs:
 	cd esphome && $(ESPHOME) logs ambient_matrix_esp32.yaml $(if $(DEVICE),--device $(DEVICE),)
+
+logs:
+	@$(MAKE) --no-print-directory esphome-logs DEVICE=$(if $(DEVICE),$(DEVICE),ambient-matrix-lamp.local) 2>&1 | \
+	grep -E "touch_button|click_handler|single click|double click|triple click|quad click|cancel pending|reset click_count|Lamp Power"
 
 esphome-rebuild: esphome-clean esphome-compile
 

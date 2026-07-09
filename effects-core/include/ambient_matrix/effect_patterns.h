@@ -1,4 +1,5 @@
 #pragma once
+#include "animation.h"
 #include "engine.h"
 
 namespace ambient_matrix {
@@ -17,9 +18,11 @@ class EffectPatterns : public Effect {
 public:
     explicit EffectPatterns(PatternStyle style) : style_(style) {}
 
+    void reset() override { clock_.reset(); }
     void tick(MatrixCanvas&, const Matrix&, const EffectParams&, uint32_t now_ms) override;
 
 private:
+    AnimationClock clock_;
     PatternStyle style_;
 };
 

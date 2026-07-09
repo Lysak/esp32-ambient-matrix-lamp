@@ -9,9 +9,9 @@ namespace ambient_matrix {
 
 void EffectGradient::tick(MatrixCanvas& canvas, const Matrix& matrix,
                           const EffectParams& params, uint32_t now_ms) {
-    // speed > 128 scrolls up, < 128 scrolls down
-    int8_t  dir    = (int8_t)params.speed - 128;
-    uint8_t offset = (uint8_t)((int32_t)(now_ms >> 3) * dir >> 7);
+    const FrameInfo frame = clock_.tick(now_ms);
+    phase_.advance_centered8(frame, params.speed, 1024);
+    const uint8_t offset = phase_.byte();
     uint8_t h = matrix.height(), w = matrix.width();
     const Palette16& palette = palette_by_id(params.palette);
 

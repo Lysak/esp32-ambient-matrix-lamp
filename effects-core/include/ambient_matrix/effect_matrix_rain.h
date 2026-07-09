@@ -1,4 +1,5 @@
 #pragma once
+#include "animation.h"
 #include "engine.h"
 
 namespace ambient_matrix {
@@ -12,7 +13,7 @@ private:
     static constexpr uint8_t kMaxColumns = 16;
     float heads_[kMaxColumns]{};
     float speeds_[kMaxColumns]{};
-    uint32_t last_ms_ = 0;
+    AnimationClock clock_;
     bool initialized_ = false;
 };
 

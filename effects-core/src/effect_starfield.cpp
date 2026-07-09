@@ -12,7 +12,7 @@ void EffectStarfield::spawn(Star& star, bool initial) {
 }
 
 void EffectStarfield::reset() {
-    last_ms_ = 0;
+    clock_.reset();
     initialized_ = false;
 }
 
@@ -25,17 +25,15 @@ void EffectStarfield::tick(MatrixCanvas& canvas, const Matrix& matrix,
     if (!initialized_) {
         for (auto& star : stars_) spawn(star, true);
         initialized_ = true;
-        last_ms_ = now_ms;
     }
 
-    float dt = (now_ms - last_ms_) * 0.001f;
-    if (dt > 0.08f) dt = 0.08f;
-    last_ms_ = now_ms;
+    const FrameInfo frame_info = clock_.tick(now_ms);
+    const float dt = frame_info.delta_s();
 
     const float cx = (w - 1) * 0.5f;
     const float cy = (h - 1) * 0.5f;
     const float scale = (w < h ? w : h) * 0.48f;
-    Rgb frame[256]{};
+    Rgb frame_buf[256]{};
 
     for (auto& star : stars_) {
         star.z -= star.speed * dt;
@@ -50,21 +48,21 @@ void EffectStarfield::tick(MatrixCanvas& canvas, const Matrix& matrix,
 
         const uint8_t value = (uint8_t)(70.0f + (1.0f - star.z) * 185.0f);
         const uint16_t index = matrix.xy_wrap((int16_t)px, (uint8_t)py);
-        frame[index] = add_rgb(frame[index],
-                               Rgb::from_hsv(star.hue, 105, value));
+        frame_buf[index] = add_rgb(frame_buf[index],
+                                   Rgb::from_hsv(star.hue, 105, value));
 
         const float trail_z = star.z + 0.055f;
         const float tx = cx + star.x / trail_z * scale;
         const float ty = cy + star.y / trail_z * scale;
         if (ty >= 0.0f && ty < h) {
             const uint16_t trail_index = matrix.xy_wrap((int16_t)tx, (uint8_t)ty);
-            frame[trail_index] = add_rgb(frame[trail_index],
-                                         Rgb::from_hsv(star.hue, 180,
-                                                       value / 3));
+            frame_buf[trail_index] = add_rgb(frame_buf[trail_index],
+                                             Rgb::from_hsv(star.hue, 180,
+                                                           value / 3));
         }
     }
 
-    for (uint16_t i = 0; i < canvas.size(); i++) canvas.set_pixel(i, frame[i]);
+    for (uint16_t i = 0; i < canvas.size(); i++) canvas.set_pixel(i, frame_buf[i]);
 }
 
 } // namespace ambient_matrix

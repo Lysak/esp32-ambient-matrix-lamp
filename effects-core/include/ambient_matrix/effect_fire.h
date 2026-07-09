@@ -1,4 +1,5 @@
 #pragma once
+#include "animation.h"
 #include "engine.h"
 
 namespace ambient_matrix {
@@ -12,6 +13,8 @@ public:
 
 private:
     uint8_t heat_[16][16]{};  // heat_[x][y], y=0 is bottom (hottest)
+    AnimationClock clock_;
+    FixedStep stepper_{30};
 };
 
 } // namespace ambient_matrix

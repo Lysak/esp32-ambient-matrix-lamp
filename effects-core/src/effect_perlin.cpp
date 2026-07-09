@@ -10,9 +10,11 @@ namespace ambient_matrix {
 
 void EffectPerlin::tick(MatrixCanvas& canvas, const Matrix& matrix,
                         const EffectParams& params, uint32_t now_ms) {
+    const FrameInfo frame = clock_.tick(now_ms);
+    phase_.advance_linear16(frame, params.speed, 2048);
     // step controls spatial zoom: larger step = coarser noise
     uint8_t  step = (params.scale >> 2) + 4;
-    uint16_t t    = (uint16_t)((now_ms >> 3) * params.speed >> 8);
+    const uint16_t t = phase_.word();
 
     uint8_t w = matrix.width(), h = matrix.height();
     const Palette16& palette = palette_by_id(params.palette);

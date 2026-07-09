@@ -4,7 +4,7 @@
 namespace ambient_matrix {
 
 void EffectMatrixRain::reset() {
-    last_ms_ = 0;
+    clock_.reset();
     initialized_ = false;
 }
 
@@ -21,12 +21,10 @@ void EffectMatrixRain::tick(MatrixCanvas& canvas, const Matrix& matrix,
             speeds_[x] = 2.2f + random8(180) / 100.0f;
         }
         initialized_ = true;
-        last_ms_ = now_ms;
     }
 
-    float dt = (now_ms - last_ms_) * 0.001f;
-    if (dt > 0.08f) dt = 0.08f;
-    last_ms_ = now_ms;
+    const FrameInfo frame = clock_.tick(now_ms);
+    const float dt = frame.delta_s();
 
     static constexpr float kTrail = 7.0f;
     for (uint8_t x = 0; x < w; x++) {

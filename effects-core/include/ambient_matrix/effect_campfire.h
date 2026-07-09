@@ -1,4 +1,5 @@
 #pragma once
+#include "animation.h"
 #include "engine.h"
 
 namespace ambient_matrix {
@@ -25,6 +26,9 @@ private:
     uint8_t heat_[kMaxSize][kMaxSize]{};
     uint8_t next_heat_[kMaxSize][kMaxSize]{};
     Spark sparks_[kSparkCount]{};
+    AnimationClock clock_;
+    FixedStep stepper_{30};
+    uint32_t sim_ms_ = 0;
 };
 
 } // namespace ambient_matrix

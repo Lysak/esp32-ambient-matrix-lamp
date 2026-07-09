@@ -1,4 +1,5 @@
 #pragma once
+#include "animation.h"
 #include "engine.h"
 #include "types.h"
 
@@ -13,6 +14,8 @@ public:
 
 private:
     Rgb buf_[256]{};
+    AnimationClock clock_;
+    FixedStep stepper_{30};
 };
 
 } // namespace ambient_matrix

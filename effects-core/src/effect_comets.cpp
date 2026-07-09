@@ -4,7 +4,7 @@
 namespace ambient_matrix {
 
 void EffectComets::reset() {
-    last_ms_ = 0;
+    clock_.reset();
     initialized_ = false;
 }
 
@@ -23,14 +23,12 @@ void EffectComets::tick(MatrixCanvas& canvas, const Matrix& matrix,
             comet.hue = random8();
         }
         initialized_ = true;
-        last_ms_ = now_ms;
     }
 
-    float dt = (now_ms - last_ms_) * 0.001f;
-    if (dt > 0.08f) dt = 0.08f;
-    last_ms_ = now_ms;
+    const FrameInfo frame_info = clock_.tick(now_ms);
+    const float dt = frame_info.delta_s();
 
-    Rgb frame[256]{};
+    Rgb frame_buf[256]{};
     for (auto& comet : comets_) {
         comet.x += comet.vx * dt;
         comet.y += comet.vy * dt;
@@ -53,11 +51,11 @@ void EffectComets::tick(MatrixCanvas& canvas, const Matrix& matrix,
             const Rgb color = Rgb::from_hsv((uint8_t)(comet.hue + i * 2),
                                             i == 0 ? 80 : 235, fade);
             const uint16_t index = matrix.xy_wrap(px, (uint8_t)py);
-            frame[index] = add_rgb(frame[index], color);
+            frame_buf[index] = add_rgb(frame_buf[index], color);
         }
     }
 
-    for (uint16_t i = 0; i < canvas.size(); i++) canvas.set_pixel(i, frame[i]);
+    for (uint16_t i = 0; i < canvas.size(); i++) canvas.set_pixel(i, frame_buf[i]);
 }
 
 } // namespace ambient_matrix

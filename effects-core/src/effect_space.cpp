@@ -372,26 +372,27 @@ void render_relic(Rgb* frame, const Matrix& matrix, uint32_t now_ms) {
 
 void EffectSpace::tick(MatrixCanvas& canvas, const Matrix& matrix,
                        const EffectParams&, uint32_t now_ms) {
+    const FrameInfo frame_time = clock_.tick(now_ms);
     if (matrix.width() == 0 || matrix.height() == 0 || canvas.size() > 256) return;
     Rgb frame[256]{};
-    const float t = now_ms * 0.001f;
+    const float t = frame_time.total_s();
 
     switch (style_) {
-        case SpaceStyle::CosmicNebula: render_nebula(frame, matrix, now_ms); break;
+        case SpaceStyle::CosmicNebula: render_nebula(frame, matrix, frame_time.total_ms); break;
         case SpaceStyle::Wormhole: render_wormhole(frame, matrix, t); break;
         case SpaceStyle::OrbitalDance: render_orbits(frame, matrix, t); break;
-        case SpaceStyle::SolarStorm: render_solar_storm(frame, matrix, t, now_ms); break;
+        case SpaceStyle::SolarStorm: render_solar_storm(frame, matrix, t, frame_time.total_ms); break;
         case SpaceStyle::Pulsar: render_pulsar(frame, matrix, t); break;
         case SpaceStyle::StarrySky: render_starry_sky(frame, matrix, t); break;
-        case SpaceStyle::AsteroidImpact: render_asteroid(frame, matrix, t, now_ms); break;
-        case SpaceStyle::PacmanOrbit: render_pacman(frame, matrix, t, now_ms); break;
+        case SpaceStyle::AsteroidImpact: render_asteroid(frame, matrix, t, frame_time.total_ms); break;
+        case SpaceStyle::PacmanOrbit: render_pacman(frame, matrix, t, frame_time.total_ms); break;
         case SpaceStyle::SpacePolice: render_space_police(frame, matrix, t); break;
         case SpaceStyle::PurpleMeteors: render_purple_meteors(frame, matrix, t); break;
         case SpaceStyle::LightSpeed: render_light_speed(frame, matrix, t); break;
-        case SpaceStyle::Supernova: render_supernova(frame, matrix, now_ms); break;
-        case SpaceStyle::MarsFlight: render_mars_flight(frame, matrix, t, now_ms); break;
+        case SpaceStyle::Supernova: render_supernova(frame, matrix, frame_time.total_ms); break;
+        case SpaceStyle::MarsFlight: render_mars_flight(frame, matrix, t, frame_time.total_ms); break;
         case SpaceStyle::Singularity: render_singularity(frame, matrix, t); break;
-        case SpaceStyle::RelicRadiation: render_relic(frame, matrix, now_ms); break;
+        case SpaceStyle::RelicRadiation: render_relic(frame, matrix, frame_time.total_ms); break;
     }
 
     for (uint16_t i = 0; i < canvas.size(); i++) canvas.set_pixel(i, frame[i]);

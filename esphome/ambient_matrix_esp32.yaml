@@ -33,6 +33,7 @@ esphome:
   includes:
     - custom/adapter.h
     - custom/brightness.h
+    - custom/log_time.h
     - custom/power_transition.h
     - custom/sunrise_renderer.h
     - custom/effect_prefs.h
@@ -46,7 +47,7 @@ esphome:
     then:
       - lambda: |-
           effect_prefs_load(id(current_effect).c_str());
-          id(lamp_effect).publish_state((float)effect_id(id(current_effect)));
+          id(lamp_effect).publish_state(id(current_effect));
           id(effect_speed).publish_state((float)g_effect_speed);
           id(effect_scale).publish_state((float)g_effect_scale);
           id(effect_color).publish_state((float)g_effect_color);

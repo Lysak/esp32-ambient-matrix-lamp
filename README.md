@@ -31,16 +31,17 @@ TTP223 OUT   →  GPIO27 (P27)
 
 ### Touch button behaviour
 
-Multi-click logic uses a short `350 ms` window after the last tap for faster response:
+Multi-click logic uses a trailing-edge debounce window of `500 ms` after the
+last release. A new press cancels the pending single-click dispatch so the
+firmware waits for the full tap burst before choosing the final action.
 
 | Gesture | Action |
 |---|---|
-| 1 tap (lamp on) | Next effect |
-| 1 tap (lamp off) | Power on, keep the last saved effect |
-| 2 taps | Previous effect |
-| 3 taps | No action |
-| 4 taps | Toggle power on / off |
-| Hold ≥ 800 ms (lamp on) | Ramp brightness level `1..10` every 500 ms |
+| 1 tap | Toggle power on / off |
+| 2 taps | Next effect |
+| 3 taps | Previous effect |
+| 4 taps | Reset to the first effect (`Color`) |
+| Hold ≥ 800 ms (lamp on) | Ramp brightness level `1..10` every `80 ms`; release flips the brightness direction for the next hold |
 
 ### Sunrise schedule
 
@@ -73,26 +74,9 @@ On boot, the lamp powers on automatically with the last saved effect and the las
 Effect auto-rotation is disabled by default and exposed as a separate `Lamp Auto Rotate` switch in ESPHome / Home Assistant.
 When enabled, it advances to the next effect every 1 minute while the lamp is on.
 
-### Old-ESPHome compatibility note
+`Lamp Effect` is exposed as a dropdown entity in Home Assistant.
 
-For ESPHome `2024.3.2`, the two template dropdowns were replaced with numeric entities because that older release does not handle the newer `template select` automations used by this project.
-
-- `Lamp Effect Index`: `0..8`
-- `Effect Palette Index`: `0..7`
-
-Lamp effect index mapping:
-
-- `0` = `Color`
-- `1` = `Color Shift`
-- `2` = `Gradient`
-- `3` = `Perlin`
-- `4` = `Particles`
-- `5` = `Fire`
-- `6` = `Fire 2020`
-- `7` = `Confetti`
-- `8` = `Tornado`
-
-Palette index mapping:
+`Effect Palette Index` remains a numeric config entity with this mapping:
 
 - `0` = `Heat`
 - `1` = `Lava`

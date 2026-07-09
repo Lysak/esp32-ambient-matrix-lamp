@@ -1,4 +1,5 @@
 #pragma once
+#include "animation.h"
 #include "engine.h"
 
 namespace ambient_matrix {
@@ -21,7 +22,7 @@ private:
     void spawn(Star& star, bool initial);
 
     Star stars_[kCount]{};
-    uint32_t last_ms_ = 0;
+    AnimationClock clock_;
     bool initialized_ = false;
 };
 
