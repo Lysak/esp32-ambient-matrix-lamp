@@ -23,6 +23,7 @@ function readStdin() {
     process.stdin.on("end", () =>
       resolve(Buffer.concat(chunks).toString("utf8")),
     );
+    process.stdin.on("error", () => resolve(""));
   });
 }
 
@@ -36,13 +37,18 @@ try {
 }
 
 if (payload !== null) {
-  const { logLine, response } = formatCodexHookEvent(
-    payload,
-    new Date().toISOString(),
-  );
-  mkdirSync(dirname(LOG_PATH), { recursive: true });
-  appendFileSync(LOG_PATH, logLine);
-  process.stdout.write(response);
+  try {
+    const { logLine, response } = formatCodexHookEvent(
+      payload,
+      new Date().toISOString(),
+    );
+    mkdirSync(dirname(LOG_PATH), { recursive: true });
+    appendFileSync(LOG_PATH, logLine);
+    process.stdout.write(response);
+  } catch {
+    // Filesystem error: still respond so Codex is never blocked, just skip logging.
+    process.stdout.write(JSON.stringify({ continue: true }));
+  }
 } else {
   process.stdout.write(JSON.stringify({ continue: true }));
 }
