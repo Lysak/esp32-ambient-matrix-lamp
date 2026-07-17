@@ -35,6 +35,9 @@ This scaffold includes:
   `scripts/codex-hook-capture.mjs`
 - a family status poll loop wired into `main.ts` for both `Claude Code` and
   `Codex`
+- `Home Assistant` publishing: a single aggregated `global_status` (via
+  `aggregateGlobalStatus`) is published to an `input_select` entity through
+  Home Assistant's REST API, whenever it changes
 
 Confirmed raw `Claude Code` statuses so far: `busy` -> `thinking`, `idle` -> `idle`.
 Any other raw status is unconfirmed and is mapped to `error` on purpose, so it
@@ -47,7 +50,9 @@ JSON event per line) and keeps only the most recent event per session.
 
 This scaffold does not include yet:
 
-- `Home Assistant` publishing implementation
+- richer session grouping, subagent-aware aggregation, or alternative
+  publishers beyond Home Assistant (see `mac-agent-status-bridge-design.md`'s
+  extension strategy)
 
 `Codex` hooks are registered per-repo in `.codex/hooks.json` at the repository
 root (not in the shared `~/.codex/config.toml`, which already has an unrelated
@@ -74,3 +79,23 @@ stale compiled output.
   pnpm's `minimumReleaseAge` supply-chain policy enabled (no bypass) while
   still using the newest `vite` that is old enough to clear it. Bump the pin
   yourself once a newer release has had a few days to age.
+
+## Home Assistant setup
+
+1. Copy `.env.example` to `.env` and fill in `HA_URL` and `HA_TOKEN` (a
+   long-lived access token from your Home Assistant user profile). `.env`
+   is gitignored — never commit it.
+2. In your Home Assistant `configuration.yaml`, add the `input_select`
+   block from `docs/agent-status-lamp/home-assistant-input-select.yaml`
+   (or merge it into an existing `input_select:` key), then restart Home
+   Assistant or reload `input_select` entities from Developer Tools -> YAML.
+3. Run `pnpm dev`. Without `.env`, the bridge logs
+   "HA_URL/HA_TOKEN not set" and behaves exactly as before. With it
+   configured, `input_select.agent_status` in Home Assistant should update
+   whenever `global_status` changes in the console output.
+
+The mapping from the bridge's internal statuses to Home Assistant's
+`input_select` options lives in one place:
+`src/publishers/mapToHomeAssistantStatus.ts`. Extending either vocabulary
+later (e.g. giving "done" its own HA state instead of "inactive") means
+editing only that file.
