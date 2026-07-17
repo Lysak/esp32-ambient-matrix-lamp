@@ -17,7 +17,13 @@ export function createCodexCollector(
       const events: RawCodexEvent[] = raw
         .split("\n")
         .filter((line) => line.length > 0)
-        .map((line) => JSON.parse(line));
+        .flatMap((line) => {
+          try {
+            return [JSON.parse(line) as RawCodexEvent];
+          } catch {
+            return [];
+          }
+        });
 
       const latestBySession = new Map<string, RawCodexEvent>();
       for (const event of events) {
