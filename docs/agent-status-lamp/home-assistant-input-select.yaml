@@ -1,0 +1,13 @@
+# Paste this into Home Assistant's configuration.yaml under an `input_select:`
+# key (or merge it into an existing one), then restart Home Assistant or
+# reload input_select entities from Developer Tools -> YAML.
+input_select:
+  agent_status:
+    name: Agent Status
+    options:
+      - inactive
+      - thinking
+      - needs_user
+      - error
+    initial: inactive
+    icon: mdi:robot
