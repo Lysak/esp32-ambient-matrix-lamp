@@ -1,0 +1,291 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - link "Перейти до основного вмісту":
+          - /url: "#supply-main"
+        - generic [ref=e6]:
+          - link "OpenAI Home" [ref=e7] [cursor=pointer]:
+            - /url: /uk-UA/
+          - generic [ref=e13]:
+            - navigation "Основна навігація" [ref=e15]:
+              - list [ref=e16]:
+                - listitem [ref=e17]:
+                  - link "Дослідження" [ref=e18] [cursor=pointer]:
+                    - /url: /uk-UA/research/index/
+                  - button "Меню Дослідження"
+                - listitem [ref=e21]:
+                  - button "Продукти" [ref=e22] [cursor=pointer]
+                  - button "Меню Продукти"
+                - listitem [ref=e25]:
+                  - link "Business" [ref=e26] [cursor=pointer]:
+                    - /url: /uk-UA/business/
+                  - button "Меню Business"
+                - listitem [ref=e29]:
+                  - link "Розробники" [ref=e30] [cursor=pointer]:
+                    - /url: /uk-UA/api/
+                  - button "Меню Розробники"
+                - listitem [ref=e33]:
+                  - link "Компанія" [ref=e34] [cursor=pointer]:
+                    - /url: /uk-UA/about/
+                  - button "Меню Компанія"
+                - listitem [ref=e37]:
+                  - link "Foundation (відкривається у новому вікні)" [ref=e38] [cursor=pointer]:
+                    - /url: https://openaifoundation.org/uk-UA/
+                    - generic [ref=e39]: Foundation
+                    - generic [ref=e41]: (відкривається у новому вікні)
+            - generic [ref=e43]:
+              - button "Відкрити пошук" [ref=e45] [cursor=pointer]
+              - button "Закрити пошук" [ref=e48] [cursor=pointer]
+            - generic [ref=e52]:
+              - button "Увійти" [ref=e53] [cursor=pointer]
+              - link "Спробуйте ChatGPT (відкривається у новому вікні)" [ref=e56] [cursor=pointer]:
+                - /url: https://chatgpt.com/?openaicom-did=e364aee8-057d-486d-898f-76158702eb64&openaicom_referred=true
+                - text: Спробуйте ChatGPT
+                - generic [ref=e59]: (відкривається у новому вікні)
+    - generic [ref=e60]:
+      - main [ref=e61]:
+        - generic [ref=e62]: Supply Co. x Робота Louder | OpenAI
+        - generic [ref=e63]:
+          - navigation "Параметри навігації для Supply" [ref=e65]:
+            - generic [ref=e66]:
+              - link "Головна сторінка Supply" [ref=e67] [cursor=pointer]:
+                - /url: /uk-UA/supply/
+                - generic [ref=e68]: Supply Co.
+              - list [ref=e70]:
+                - listitem [ref=e71]:
+                  - link [ref=e72] [cursor=pointer]:
+                    - /url: /uk-UA/supply/co-lab/work-louder/
+                - listitem [ref=e74]:
+                  - link [ref=e75] [cursor=pointer]:
+                    - /url: /uk-UA/supply/shop/
+                - listitem [ref=e77]:
+                  - link [ref=e78] [cursor=pointer]:
+                    - /url: /uk-UA/supply/archive/
+                - listitem [ref=e80]:
+                  - link [ref=e81] [cursor=pointer]:
+                    - /url: /uk-UA/supply/about/
+                - listitem [ref=e83]:
+                  - link [ref=e84] [cursor=pointer]:
+                    - /url: /uk-UA/supply/faq/
+                - listitem [ref=e86]:
+                  - button "Кошик" [ref=e87] [cursor=pointer]
+          - generic [ref=e92]:
+            - generic [ref=e93]:
+              - generic [ref=e95]:
+                - generic [ref=e96]: WORK LOUDER CO-LAB
+                - heading "Codex Micro" [level=1] [ref=e97]
+              - generic [ref=e98]: Ваш браузер не підтримує відеотег.
+              - paragraph [ref=e109]: Командний центр для ефективної роботи агентів
+            - generic [ref=e110]:
+              - generic [ref=e112]:
+                - generic [ref=e114]:
+                  - generic [ref=e116]:
+                    - generic [ref=e120]:
+                      - generic:
+                        - img "Медіаелемент"
+                    - generic [ref=e124]:
+                      - generic:
+                        - img "Медіаелемент"
+                  - generic [ref=e130]:
+                    - generic:
+                      - img "Медіаелемент"
+                  - generic [ref=e132]:
+                    - generic [ref=e136]:
+                      - generic:
+                        - img "Медіаелемент"
+                    - generic [ref=e140]:
+                      - generic:
+                        - img "Медіаелемент"
+                  - generic [ref=e146]:
+                    - generic:
+                      - img "Медіаелемент"
+                  - generic [ref=e148]:
+                    - generic [ref=e152]:
+                      - generic:
+                        - img "Медіаелемент"
+                    - generic [ref=e156]:
+                      - generic:
+                        - img "Медіаелемент"
+                  - generic [ref=e162]:
+                    - generic:
+                      - img "Медіаелемент"
+                  - generic [ref=e164]:
+                    - generic [ref=e168]:
+                      - generic:
+                        - img "Медіаелемент"
+                    - generic [ref=e172]:
+                      - generic:
+                        - img "Медіаелемент"
+                  - generic [ref=e178]:
+                    - generic:
+                      - img "Медіаелемент"
+                  - generic [ref=e180]:
+                    - generic [ref=e184]:
+                      - generic:
+                        - img "Медіаелемент"
+                    - generic [ref=e188]:
+                      - generic:
+                        - img "Медіаелемент"
+                  - generic [ref=e194]:
+                    - generic:
+                      - img "Медіаелемент"
+                - button "Попереднє зображення" [ref=e195] [cursor=pointer]:
+                  - generic: <-
+                - button "Наступне зображення" [ref=e196] [cursor=pointer]:
+                  - generic: "->"
+              - generic [ref=e198]:
+                - generic [ref=e199]:
+                  - generic [ref=e200]:
+                    - heading "Codex Micro" [level=2] [ref=e201]
+                    - status [ref=e202]: 230,00 USD
+                  - generic [ref=e203]:
+                    - paragraph [ref=e204]: kbd-1.0-codex-micro, розроблена спільно з Work Louder, робить ваш агентний робочий простір ще доступнішим. Тримайте активні чати під рукою, миттєво визначайте статус кожного агента завдяки RGB-індикації в реальному часі, і закріплюйте за тактильними елементами керування найуживаніші дії Codex. Ця клавіатура створена для ідеальної роботи та ідеальних релізів.
+                    - paragraph [ref=e205]: У комплект входить Codex Icon Keyset — набір із 32 додаткового ковпачка клавіш.
+                    - paragraph [ref=e206]: Гарантія та підтримка включені.
+                - generic [ref=e208]:
+                  - generic [ref=e209]:
+                    - group "Перемикачі" [ref=e211]:
+                      - generic [ref=e213]:
+                        - generic [ref=e214]:
+                          - radio "Clicky" [disabled] [ref=e215]
+                          - generic [ref=e216]: Clicky
+                        - generic [ref=e219]:
+                          - radio "Без звуку" [disabled] [ref=e220]
+                          - generic [ref=e221]: Без звуку
+                    - button "Детальніше про перемикачі" [ref=e224] [cursor=pointer]:
+                      - generic [ref=e225]: i
+                  - button "Немає в наявності" [disabled] [ref=e227]
+            - generic [ref=e230]:
+              - generic [ref=e231]:
+                - heading "Ваші агенти — у кольорі" [level=2] [ref=e232]
+                - paragraph [ref=e233]: "Кожна клавіша Agent Key має RGB-підсвітку, що залежить від статусу Codex: тепер ви зможете бачити, яке завдання обмірковується, виконується, очікує або завершено, ще до перемикання між чатами."
+                - generic [ref=e234]:
+                  - group "Ваші агенти — у кольорі" [ref=e235]:
+                    - button "Неактивно" [pressed] [ref=e236] [cursor=pointer]
+                    - button "Непрочитаний чат" [ref=e237] [cursor=pointer]
+                    - button "Thinking" [ref=e238] [cursor=pointer]
+                    - button "Потрібне схвалення користувача / Питання" [ref=e239] [cursor=pointer]
+                    - button "Помилка" [ref=e240] [cursor=pointer]
+                  - generic [ref=e241]: Неактивно
+              - figure [ref=e242]:
+                - img "Медіаелемент" [ref=e248]
+            - heading "OpenAI x WorkLouder" [level=2] [ref=e252]
+            - generic [ref=e255]:
+              - generic [ref=e256]:
+                - generic [ref=e259]:
+                  - img "Медіаелемент" [ref=e265]
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic:
+                            - generic:
+                              - img "Медіаелемент"
+                - generic [ref=e266]:
+                  - generic [ref=e267]: "[01]"
+                  - generic [ref=e268]:
+                    - paragraph [ref=e269]: Миттєво активуйте навички
+                    - paragraph [ref=e270]: Швидко проведіть джойстиком, щоб запустити поширені робочі процеси Codex, як-от перегляд запиту на злиття (PR), налагодження помилки або рефакторинг коду.
+              - generic [ref=e271]:
+                - generic [ref=e274]:
+                  - img "Медіаелемент" [ref=e280]
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic:
+                            - generic:
+                              - img "Медіаелемент"
+                - generic [ref=e281]:
+                  - generic [ref=e282]: "[02]"
+                  - generic [ref=e283]:
+                    - paragraph [ref=e284]: Основні дії — під рукою
+                    - paragraph [ref=e285]: "Командні клавіші забезпечують окремі комбінації вашим найчастіше використовуваним діям: прийняти, відхилити, натиснути й говорити, почати новий чат тощо. Менше перемикань. Більше ефективності."
+              - generic [ref=e286]:
+                - generic [ref=e289]:
+                  - img "Медіаелемент" [ref=e295]
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic:
+                            - generic:
+                              - img "Медіаелемент"
+                - generic [ref=e296]:
+                  - generic [ref=e297]: "[03]"
+                  - generic [ref=e298]:
+                    - paragraph [ref=e299]: Налаштуйте рівень інтелекту
+                    - paragraph [ref=e300]: Поверніть регулятор, щоб налаштувати рівень міркування в реальному часі. Обирайте швидкість для простих завдань або підвищуйте рівень, коли робота потребує глибшого мислення.
+            - generic [ref=e301]:
+              - img [ref=e304]:
+                - generic [ref=e305]: Work Louder | OpenAI 2026
+                - generic [ref=e306]: Створення більше не має бар'єрів
+                - generic [ref=e307]: Почнімо створювати
+              - generic [ref=e412]:
+                - heading "Характеристики" [level=2] [ref=e413]
+                - generic [ref=e414]:
+                  - term [ref=e415]: Підключення
+                  - definition [ref=e416]: Bluetooth / USB-C
+                  - term [ref=e417]: Сумісність
+                  - definition [ref=e418]: Mac / Windows
+                  - term [ref=e419]: Підсвітка
+                  - definition [ref=e420]: RGB
+                  - term [ref=e421]: Матеріал та оздоблення
+                  - definition [ref=e422]: PC і алюміній з CNC-обробкою. Нижня частина з піскоструменевою обробкою та анодуванням. Ковпачки з PBT і PC. Гумовий ковпачок джойстика. Перемикачі POM / POK.
+                  - term [ref=e423]: Клавіатура
+                  - definition [ref=e424]: 13 механічних перемикачів. 1 сенсорний датчик. 1 поворотний енкодер. 1 планарний джойстик.
+                  - term [ref=e425]: Набір клавіш
+                  - definition [ref=e426]: 32 кастомні ковпачки. 11 однотонних ковпачків.
+                  - term [ref=e427]: Програмне забезпечення
+                  - definition [ref=e428]: ChatGPT Codex. Work Louder.
+                  - term [ref=e429]: Включено
+                  - definition [ref=e430]: Creator Micro. Кабель USB-C на USB-C. Набір ковпачків клавіш із піктограмами Codex (30×1U, 1×2U).
+            - link [ref=e433] [cursor=pointer]:
+              - /url: /uk-UA/supply/shop/
+              - generic [ref=e435]:
+                - heading "Назад до магазину" [level=2] [ref=e436]
+                - generic [ref=e437]: →
+                - generic [ref=e438]: →
+      - contentinfo [ref=e440]:
+        - generic [ref=e442]:
+          - generic [ref=e443]:
+            - link "OpenAI Home" [ref=e444] [cursor=pointer]:
+              - /url: /uk-UA/
+            - paragraph [ref=e447]: OpenAI © 2015–2026
+          - generic [ref=e448]:
+            - button "Керування файлами cookie" [ref=e449] [cursor=pointer]
+            - link "Умови використання" [ref=e450] [cursor=pointer]:
+              - /url: /policies/terms-of-use/
+            - link "Політика конфіденційності" [ref=e451] [cursor=pointer]:
+              - /url: /policies/privacy-policy/
+          - generic [ref=e453]:
+            - button "Змінити мову" [ref=e454] [cursor=pointer]:
+              - generic [ref=e455]: українська
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - generic:
+                      - textbox "Шукати локалі за назвою або регіоном":
+                        - /placeholder: Пошук
+  - dialog [ref=e460]:
+    - generic [ref=e461]:
+      - paragraph [ref=e462]: Ми використовуємо файли cookie
+      - paragraph [ref=e463]:
+        - text: Ми використовуємо файли cookie, щоб допомогти функціонуванню цього сайту, зрозуміти використання сервісів і забезпечити підтримку маркетингових зусиль. Відвідайте
+        - button "Керування файлами cookie" [ref=e464] [cursor=pointer]
+        - text: ", щоб змінити налаштування в будь-який час. Перегляньте нашу"
+        - link "Політику використання файлів cookie" [ref=e465] [cursor=pointer]:
+          - /url: /policies/cookie-policy/
+        - text: для отримання додаткової інформації.
+    - generic [ref=e466]:
+      - button "Керування файлами cookie" [ref=e467] [cursor=pointer]
+      - button "Відхилити неістотне" [ref=e468] [cursor=pointer]
+      - button "Прийняти все" [ref=e469] [cursor=pointer]
+  - complementary [ref=e470]:
+    - generic [ref=e471]:
+      - paragraph [ref=e472]: Codex Micro
+      - button [ref=e473] [cursor=pointer]:
+        - generic [ref=e474]: Покупка
+  - alert [ref=e475]
