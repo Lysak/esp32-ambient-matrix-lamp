@@ -1130,7 +1130,7 @@ light:
       # from the user-facing effect list and button cycle.
       - addressable_lambda:
           name: "On/Off: Power Helix"
-          update_interval: 16ms
+          update_interval: 15ms
           lambda: |-
             static const ambient_matrix::Matrix matrix(16, 16);
             if (!id(power_transition_active)) {
@@ -1149,7 +1149,7 @@ light:
 
       - addressable_lambda:
           name: "Sunrise"
-          update_interval: 16ms
+          update_interval: 15ms
           lambda: |-
             if (!id(sunrise_active)) {
               ESPHomeMatrixCanvas(it).clear();
@@ -1197,7 +1197,7 @@ light:
 
       - addressable_lambda:
           name: "Rainbow 2"
-          update_interval: 16ms
+          update_interval: 15ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
@@ -1208,7 +1208,7 @@ light:
 
       - addressable_lambda:
           name: "Color (Original)"
-          update_interval: 16ms
+          update_interval: 15ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
@@ -1219,7 +1219,7 @@ light:
 
       - addressable_lambda:
           name: "Color Shift (Original)"
-          update_interval: 16ms
+          update_interval: 15ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
@@ -1230,7 +1230,7 @@ light:
 
       - addressable_lambda:
           name: "Gradient (Original)"
-          update_interval: 16ms
+          update_interval: 15ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
@@ -1241,7 +1241,7 @@ light:
 
       - addressable_lambda:
           name: "Perlin (Original)"
-          update_interval: 16ms
+          update_interval: 15ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
@@ -1252,7 +1252,7 @@ light:
 
       - addressable_lambda:
           name: "Particles (Original)"
-          update_interval: 16ms
+          update_interval: 15ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
@@ -1263,7 +1263,7 @@ light:
 
       - addressable_lambda:
           name: "Fire Classic"
-          update_interval: 16ms
+          update_interval: 15ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
@@ -1274,7 +1274,7 @@ light:
 
       - addressable_lambda:
           name: "Fire (Original)"
-          update_interval: 16ms
+          update_interval: 15ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
@@ -1285,7 +1285,7 @@ light:
 
       - addressable_lambda:
           name: "Confetti (Original)"
-          update_interval: 30ms
+          update_interval: 15ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
@@ -1296,7 +1296,7 @@ light:
 
       - addressable_lambda:
           name: "Tornado (Original)"
-          update_interval: 30ms
+          update_interval: 15ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
@@ -1307,7 +1307,7 @@ light:
 
       - addressable_lambda:
           name: "Benchmark Circle"
-          update_interval: 16ms
+          update_interval: 15ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
@@ -1318,7 +1318,7 @@ light:
 
       - addressable_lambda:
           name: "Benchmark Ball"
-          update_interval: 16ms
+          update_interval: 15ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
@@ -1329,7 +1329,7 @@ light:
 
       - addressable_lambda:
           name: "Benchmark Sine"
-          update_interval: 16ms
+          update_interval: 15ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
@@ -1340,7 +1340,7 @@ light:
 
       - addressable_lambda:
           name: "Color Scanner 2"
-          update_interval: 16ms
+          update_interval: 15ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
@@ -1351,7 +1351,7 @@ light:
 
       - addressable_lambda:
           name: "Blue Scanner 2"
-          update_interval: 16ms
+          update_interval: 15ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
@@ -1362,7 +1362,7 @@ light:
 
       - addressable_lambda:
           name: "Plasma 2"
-          update_interval: 16ms
+          update_interval: 15ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
@@ -1373,7 +1373,7 @@ light:
 
       - addressable_lambda:
           name: "Aurora 2"
-          update_interval: 16ms
+          update_interval: 15ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
@@ -1384,7 +1384,7 @@ light:
 
       - addressable_lambda:
           name: "Neon Rings 2"
-          update_interval: 16ms
+          update_interval: 15ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
@@ -1395,7 +1395,7 @@ light:
 
       - addressable_lambda:
           name: "Kaleidoscope 2"
-          update_interval: 16ms
+          update_interval: 15ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
@@ -1406,7 +1406,7 @@ light:
 
       - addressable_lambda:
           name: "Digital Rain 2"
-          update_interval: 16ms
+          update_interval: 15ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
@@ -1417,7 +1417,7 @@ light:
 
       - addressable_lambda:
           name: "Comet Shower 2"
-          update_interval: 16ms
+          update_interval: 15ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
@@ -1428,7 +1428,7 @@ light:
 
       - addressable_lambda:
           name: "Starfield 2"
-          update_interval: 16ms
+          update_interval: 15ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
@@ -1439,7 +1439,7 @@ light:
 
       - addressable_lambda:
           name: "Cosmic Nebula 2"
-          update_interval: 16ms
+          update_interval: 15ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
@@ -1450,7 +1450,7 @@ light:
 
       - addressable_lambda:
           name: "Wormhole 2"
-          update_interval: 16ms
+          update_interval: 15ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
@@ -1461,7 +1461,7 @@ light:
 
       - addressable_lambda:
           name: "Orbital Dance 2"
-          update_interval: 16ms
+          update_interval: 15ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
@@ -1472,7 +1472,7 @@ light:
 
       - addressable_lambda:
           name: "Solar Storm 2"
-          update_interval: 16ms
+          update_interval: 15ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
@@ -1483,7 +1483,7 @@ light:
 
       - addressable_lambda:
           name: "Pulsar 2"
-          update_interval: 16ms
+          update_interval: 15ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
@@ -1494,7 +1494,7 @@ light:
 
       - addressable_lambda:
           name: "Starry Sky 2"
-          update_interval: 16ms
+          update_interval: 15ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
@@ -1505,7 +1505,7 @@ light:
 
       - addressable_lambda:
           name: "Asteroid Impact 2"
-          update_interval: 16ms
+          update_interval: 15ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
@@ -1516,7 +1516,7 @@ light:
 
       - addressable_lambda:
           name: "Pac-Man Orbit 2"
-          update_interval: 16ms
+          update_interval: 15ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
@@ -1527,7 +1527,7 @@ light:
 
       - addressable_lambda:
           name: "Space Police 2"
-          update_interval: 16ms
+          update_interval: 15ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
@@ -1538,7 +1538,7 @@ light:
 
       - addressable_lambda:
           name: "Purple Meteor Shower 2"
-          update_interval: 16ms
+          update_interval: 15ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
@@ -1549,7 +1549,7 @@ light:
 
       - addressable_lambda:
           name: "Light Speed 2"
-          update_interval: 16ms
+          update_interval: 15ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
@@ -1560,7 +1560,7 @@ light:
 
       - addressable_lambda:
           name: "Supernova 2"
-          update_interval: 16ms
+          update_interval: 15ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
@@ -1571,7 +1571,7 @@ light:
 
       - addressable_lambda:
           name: "Flight to Mars 2"
-          update_interval: 16ms
+          update_interval: 15ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
@@ -1582,7 +1582,7 @@ light:
 
       - addressable_lambda:
           name: "Singularity 2"
-          update_interval: 16ms
+          update_interval: 15ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
@@ -1593,7 +1593,7 @@ light:
 
       - addressable_lambda:
           name: "Relic Radiation 2"
-          update_interval: 16ms
+          update_interval: 15ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
@@ -1604,7 +1604,7 @@ light:
 
       - addressable_lambda:
           name: "Ocean Waves 2"
-          update_interval: 25ms
+          update_interval: 15ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
@@ -1615,7 +1615,7 @@ light:
 
       - addressable_lambda:
           name: "Lava Lamp 2"
-          update_interval: 25ms
+          update_interval: 15ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};
@@ -1626,7 +1626,7 @@ light:
 
       - addressable_lambda:
           name: "Campfire 2"
-          update_interval: 16ms
+          update_interval: 15ms
           lambda: |-
             if (!id(lamp_powered)) { ESPHomeMatrixCanvas(it).clear(); return; }
             static ambient_matrix::EffectEngine engine{ambient_matrix::Matrix(16, 16)};

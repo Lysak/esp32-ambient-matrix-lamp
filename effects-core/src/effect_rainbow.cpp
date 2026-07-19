@@ -7,8 +7,8 @@ void EffectRainbow::reset() {
     phase_.reset();
 }
 
-void EffectRainbow::tick(MatrixCanvas& canvas, const Matrix& matrix,
-                          const EffectParams& params, uint32_t now_ms) {
+void EffectRainbow::tick(MatrixCanvas& canvas, const Matrix& matrix, const EffectParams& params,
+                         uint32_t now_ms) {
     const FrameInfo frame = clock_.tick(now_ms);
     phase_.advance_linear8(frame, params.speed, 1280);
     const uint8_t hue_offset = phase_.byte();
@@ -18,8 +18,9 @@ void EffectRainbow::tick(MatrixCanvas& canvas, const Matrix& matrix,
 
     for (uint8_t y = 0; y < matrix.height(); y++) {
         for (uint8_t x = 0; x < matrix.width(); x++) {
-            uint8_t hue = (uint8_t)((uint16_t)x * 256 / matrix.width()
-                          + (uint16_t)y * spread / matrix.height()) + hue_offset;
+            uint8_t hue = (uint8_t)((uint16_t)x * 256 / matrix.width() +
+                                    (uint16_t)y * spread / matrix.height()) +
+                          hue_offset;
             canvas.set_pixel(matrix.xy(x, y), Rgb::from_hsv(hue, 255, 255));
         }
     }

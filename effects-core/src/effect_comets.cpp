@@ -8,8 +8,8 @@ void EffectComets::reset() {
     initialized_ = false;
 }
 
-void EffectComets::tick(MatrixCanvas& canvas, const Matrix& matrix,
-                        const EffectParams&, uint32_t now_ms) {
+void EffectComets::tick(MatrixCanvas& canvas, const Matrix& matrix, const EffectParams&,
+                        uint32_t now_ms) {
     const uint8_t w = matrix.width();
     const uint8_t h = matrix.height();
     if (w == 0 || h == 0 || canvas.size() > 256) return;
@@ -32,8 +32,10 @@ void EffectComets::tick(MatrixCanvas& canvas, const Matrix& matrix,
     for (auto& comet : comets_) {
         comet.x += comet.vx * dt;
         comet.y += comet.vy * dt;
-        while (comet.x < 0.0f) comet.x += w;
-        while (comet.x >= w) comet.x -= w;
+        while (comet.x < 0.0f)
+            comet.x += w;
+        while (comet.x >= w)
+            comet.x -= w;
         if (comet.y < -5.0f) {
             comet.x = random8(w);
             comet.y = h + random8((uint8_t)(h + 1));
@@ -48,14 +50,14 @@ void EffectComets::tick(MatrixCanvas& canvas, const Matrix& matrix,
             const int16_t py = (int16_t)(comet.y - comet.vy * age + 0.5f);
             if (py < 0 || py >= h) continue;
             const uint8_t fade = (uint8_t)(255 - i * 22);
-            const Rgb color = Rgb::from_hsv((uint8_t)(comet.hue + i * 2),
-                                            i == 0 ? 80 : 235, fade);
+            const Rgb color = Rgb::from_hsv((uint8_t)(comet.hue + i * 2), i == 0 ? 80 : 235, fade);
             const uint16_t index = matrix.xy_wrap(px, (uint8_t)py);
             frame_buf[index] = add_rgb(frame_buf[index], color);
         }
     }
 
-    for (uint16_t i = 0; i < canvas.size(); i++) canvas.set_pixel(i, frame_buf[i]);
+    for (uint16_t i = 0; i < canvas.size(); i++)
+        canvas.set_pixel(i, frame_buf[i]);
 }
 
 } // namespace ambient_matrix

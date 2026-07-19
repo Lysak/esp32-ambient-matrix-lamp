@@ -2,6 +2,7 @@
 #pragma once
 #include "nvs.h"
 #include "nvs_flash.h"
+#include "preset_table.h"
 #include <cstdint>
 #include <string>
 
@@ -10,32 +11,33 @@ inline uint8_t g_effect_scale = 100;
 inline uint8_t g_effect_color = 0;
 inline uint8_t g_effect_palette = 3;  // Rainbow
 inline uint8_t g_effect_from_palette = 0;
+inline std::string g_current_preset = "Perlin Warm (Original)";
 
 inline const char* effect_name(uint8_t id) {
     switch (id) {
-        case 0: return "Color";
-        case 1: return "Color Shift";
-        case 2: return "Gradient";
-        case 3: return "Perlin";
-        case 4: return "Particles";
-        case 5: return "Fire";
-        case 6: return "Fire 2020";
-        case 7: return "Confetti";
-        case 8: return "Tornado";
-        default: return "Color";
+        case 0: return "Color (Original)";
+        case 1: return "Color Shift (Original)";
+        case 2: return "Gradient (Original)";
+        case 3: return "Perlin (Original)";
+        case 4: return "Particles (Original)";
+        case 5: return "Fire Classic";
+        case 6: return "Fire (Original)";
+        case 7: return "Confetti (Original)";
+        case 8: return "Tornado (Original)";
+        default: return "Color (Original)";
     }
 }
 
 inline uint8_t effect_id(const std::string& name) {
-    if (name == "Color") return 0;
-    if (name == "Color Shift") return 1;
-    if (name == "Gradient") return 2;
-    if (name == "Perlin") return 3;
-    if (name == "Particles") return 4;
-    if (name == "Fire") return 5;
-    if (name == "Fire 2020") return 6;
-    if (name == "Confetti") return 7;
-    if (name == "Tornado") return 8;
+    if (name == "Color (Original)") return 0;
+    if (name == "Color Shift (Original)") return 1;
+    if (name == "Gradient (Original)") return 2;
+    if (name == "Perlin (Original)") return 3;
+    if (name == "Particles (Original)") return 4;
+    if (name == "Fire Classic") return 5;
+    if (name == "Fire (Original)") return 6;
+    if (name == "Confetti (Original)") return 7;
+    if (name == "Tornado (Original)") return 8;
     return 0;
 }
 
@@ -93,11 +95,11 @@ inline void effect_prefs_defaults(const char* name,
     from_palette = 0;
 
     std::string effect(name);
-    if (effect == "Fire 2020") {
+    if (effect == "Fire (Original)") {
         palette = 0;  // Heat
-    } else if (effect == "Fire") {
+    } else if (effect == "Fire Classic") {
         color = 8;
-    } else if (effect == "Color") {
+    } else if (effect == "Color (Original)") {
         color = 0;
         scale = 255;
     }
@@ -147,6 +149,50 @@ inline void effect_prefs_save(const char* name,
     nvs_set_u8(h, kh, color);
     nvs_set_u8(h, kp, palette);
     nvs_set_u8(h, km, from_palette);
+    nvs_commit(h);
+    nvs_close(h);
+}
+
+// Preset NVS — namespace "lamppre", keyed by preset name.
+// Loads speed/scale/palette from NVS; falls back to kPresets defaults.
+inline void preset_prefs_load(const char* preset_name) {
+    const Preset* def = find_preset(preset_name);
+    uint8_t speed    = def ? def->speed   : 128;
+    uint8_t scale    = def ? def->scale   : 128;
+    uint8_t palette  = def ? def->palette : 3;
+
+    char ks[16], kc[16], kp[16];
+    effect_prefs_key(preset_name, 's', ks);
+    effect_prefs_key(preset_name, 'c', kc);
+    effect_prefs_key(preset_name, 'p', kp);
+    nvs_handle_t h;
+    if (nvs_open("lamppre", NVS_READONLY, &h) == ESP_OK) {
+        uint8_t v = speed;
+        speed   = (nvs_get_u8(h, ks, &v) == ESP_OK) ? v : speed;
+        v = scale;
+        scale   = (nvs_get_u8(h, kc, &v) == ESP_OK) ? v : scale;
+        v = palette;
+        palette = (nvs_get_u8(h, kp, &v) == ESP_OK) ? v : palette;
+        nvs_close(h);
+    }
+    g_effect_speed   = speed;
+    g_effect_scale   = scale;
+    g_effect_palette = palette;
+}
+
+inline void preset_prefs_save(const char* preset_name,
+                              uint8_t speed,
+                              uint8_t scale,
+                              uint8_t palette) {
+    char ks[16], kc[16], kp[16];
+    effect_prefs_key(preset_name, 's', ks);
+    effect_prefs_key(preset_name, 'c', kc);
+    effect_prefs_key(preset_name, 'p', kp);
+    nvs_handle_t h;
+    if (nvs_open("lamppre", NVS_READWRITE, &h) != ESP_OK) return;
+    nvs_set_u8(h, ks, speed);
+    nvs_set_u8(h, kc, scale);
+    nvs_set_u8(h, kp, palette);
     nvs_commit(h);
     nvs_close(h);
 }

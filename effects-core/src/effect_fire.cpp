@@ -15,8 +15,8 @@ void EffectFire::reset() {
     memset(heat_, 0, sizeof(heat_));
 }
 
-void EffectFire::tick(MatrixCanvas& canvas, const Matrix& matrix,
-                      const EffectParams& params, uint32_t now_ms) {
+void EffectFire::tick(MatrixCanvas& canvas, const Matrix& matrix, const EffectParams& params,
+                      uint32_t now_ms) {
     const FrameInfo frame = clock_.tick(now_ms);
     const uint8_t steps = stepper_.consume(frame, 6);
     uint8_t w = matrix.width();
@@ -26,10 +26,10 @@ void EffectFire::tick(MatrixCanvas& canvas, const Matrix& matrix,
     const int8_t rise = 1;
     const int16_t top = h - 1;
 
-    // cooling: scale 0 = slow cooling (tall flames), scale 255 = fast (short)
-    uint8_t cooling = 2 + (255 - params.scale) / 16;
-    // sparking: speed controls spark frequency
-    uint8_t sparking = 80 + params.speed / 3;
+    // cooling: scale 0 = tall flames (slow cooling), scale 255 = short (fast cooling)
+    uint8_t cooling = 20 + (255 - params.scale) / 8;
+    // sparking: speed 128 → ~75 out of 255 (~30% chance per column per step)
+    uint8_t sparking = 50 + params.speed / 5;
 
     for (uint8_t step = 0; step < steps; step++) {
         for (uint8_t x = 0; x < w; x++) {
@@ -40,7 +40,8 @@ void EffectFire::tick(MatrixCanvas& canvas, const Matrix& matrix,
                 const int16_t below_1 = y - rise;
                 const int16_t below_2 = y - 2 * rise;
                 if (!matrix.in_bounds_y(below_2)) break;
-                heat_[x][y] = ((uint16_t)heat_[x][below_1] + heat_[x][below_2] + heat_[x][below_2]) / 3;
+                heat_[x][y] =
+                    ((uint16_t)heat_[x][below_1] + heat_[x][below_2] + heat_[x][below_2]) / 3;
             }
 
             if (random8() < sparking) {

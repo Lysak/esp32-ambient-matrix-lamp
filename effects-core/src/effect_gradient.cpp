@@ -7,19 +7,20 @@
 
 namespace ambient_matrix {
 
-void EffectGradient::tick(MatrixCanvas& canvas, const Matrix& matrix,
-                          const EffectParams& params, uint32_t now_ms) {
+void EffectGradient::tick(MatrixCanvas& canvas, const Matrix& matrix, const EffectParams& params,
+                          uint32_t now_ms) {
     const FrameInfo frame = clock_.tick(now_ms);
     phase_.advance_centered8(frame, params.speed, 1024);
     const uint8_t offset = phase_.byte();
     uint8_t h = matrix.height(), w = matrix.width();
     const Palette16& palette = palette_by_id(params.palette);
 
-    for (uint8_t y = 0; y < h; y++) {
-        // scale controls gradient spread: higher scale = more color cycles
-        uint8_t idx = (uint8_t)((uint16_t)y * (params.scale + 1) / h + offset);
-        Rgb c = color_from_palette(palette, idx, 255);
-        for (uint8_t x = 0; x < w; x++) canvas.set_pixel(matrix.xy(x, y), c);
+    // spread: scale=0 → ~10% of palette cycle, scale=255 → ~2 full cycles
+    uint8_t spread = (uint8_t)((uint16_t)params.scale * 19 / 10 + 25);
+    uint16_t n = (uint16_t)w * h;
+    for (uint16_t i = 0; i < n; i++) {
+        uint8_t idx = (uint8_t)((uint32_t)i * spread / n + offset);
+        canvas.set_pixel(i, color_from_palette(palette, idx, 255));
     }
 }
 

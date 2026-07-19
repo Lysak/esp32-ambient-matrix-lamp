@@ -8,8 +8,8 @@ void EffectMatrixRain::reset() {
     initialized_ = false;
 }
 
-void EffectMatrixRain::tick(MatrixCanvas& canvas, const Matrix& matrix,
-                            const EffectParams&, uint32_t now_ms) {
+void EffectMatrixRain::tick(MatrixCanvas& canvas, const Matrix& matrix, const EffectParams&,
+                            uint32_t now_ms) {
     uint8_t w = matrix.width();
     const uint8_t h = matrix.height();
     if (w > kMaxColumns) w = kMaxColumns;

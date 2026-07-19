@@ -15,14 +15,14 @@ public:
 private:
     static constexpr uint8_t kMaxSparks = 8;
 
-    uint16_t ff_y_  = 0;
-    uint16_t ff_z_  = 0;
-    float    spark_x_[kMaxSparks]{};
-    float    spark_y_[kMaxSparks]{};
-    uint8_t  delta_value_ = 64;
-    uint8_t  delta_hue_   = 32;
-    uint8_t  step_        = 16;
-    bool     initialized_ = false;
+    uint16_t ff_y_ = 0;
+    uint16_t ff_z_ = 0;
+    float spark_x_[kMaxSparks]{};
+    float spark_y_[kMaxSparks]{};
+    uint8_t delta_value_ = 64;
+    uint8_t delta_hue_ = 32;
+    uint8_t step_ = 16;
+    uint16_t last_scale_ = 256; // 256 = sentinel "never initialized"
     AnimationClock clock_;
     FixedStep stepper_{30};
 };

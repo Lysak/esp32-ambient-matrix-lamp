@@ -16,14 +16,15 @@ void EffectStarfield::reset() {
     initialized_ = false;
 }
 
-void EffectStarfield::tick(MatrixCanvas& canvas, const Matrix& matrix,
-                           const EffectParams&, uint32_t now_ms) {
+void EffectStarfield::tick(MatrixCanvas& canvas, const Matrix& matrix, const EffectParams&,
+                           uint32_t now_ms) {
     const uint8_t w = matrix.width();
     const uint8_t h = matrix.height();
     if (w == 0 || h == 0 || canvas.size() > 256) return;
 
     if (!initialized_) {
-        for (auto& star : stars_) spawn(star, true);
+        for (auto& star : stars_)
+            spawn(star, true);
         initialized_ = true;
     }
 
@@ -48,21 +49,20 @@ void EffectStarfield::tick(MatrixCanvas& canvas, const Matrix& matrix,
 
         const uint8_t value = (uint8_t)(70.0f + (1.0f - star.z) * 185.0f);
         const uint16_t index = matrix.xy_wrap((int16_t)px, (uint8_t)py);
-        frame_buf[index] = add_rgb(frame_buf[index],
-                                   Rgb::from_hsv(star.hue, 105, value));
+        frame_buf[index] = add_rgb(frame_buf[index], Rgb::from_hsv(star.hue, 105, value));
 
         const float trail_z = star.z + 0.055f;
         const float tx = cx + star.x / trail_z * scale;
         const float ty = cy + star.y / trail_z * scale;
         if (ty >= 0.0f && ty < h) {
             const uint16_t trail_index = matrix.xy_wrap((int16_t)tx, (uint8_t)ty);
-            frame_buf[trail_index] = add_rgb(frame_buf[trail_index],
-                                             Rgb::from_hsv(star.hue, 180,
-                                                           value / 3));
+            frame_buf[trail_index] =
+                add_rgb(frame_buf[trail_index], Rgb::from_hsv(star.hue, 180, value / 3));
         }
     }
 
-    for (uint16_t i = 0; i < canvas.size(); i++) canvas.set_pixel(i, frame_buf[i]);
+    for (uint16_t i = 0; i < canvas.size(); i++)
+        canvas.set_pixel(i, frame_buf[i]);
 }
 
 } // namespace ambient_matrix
