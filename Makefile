@@ -1,6 +1,9 @@
-BUILD_DIR := build
-CXX       := clang++
-CXXFLAGS  := -std=c++17 -Ieffects-core/include
+BUILD_DIR    := build
+CXX          := clang++
+CXXFLAGS     := -std=c++17 -Ieffects-core/include
+LLVM_BIN     := $(strip $(shell brew --prefix llvm 2>/dev/null))/bin
+CLANG_TIDY   := $(LLVM_BIN)/clang-tidy
+UNCRUSTIFY   := uncrustify
 ESPHOME_VERSION := $(strip $(shell cat .esphome-version))
 ESPHOME_PYTHON_VERSION := $(strip $(shell cat .esphome-python-version))
 ESPHOME := uv run --python $(ESPHOME_PYTHON_VERSION) --with esphome==$(ESPHOME_VERSION) --with "setuptools<81" python -m esphome
@@ -29,12 +32,15 @@ CORE_SRCS := \
     effects-core/src/effect_tornado.cpp \
     effects-core/src/effect_benchmark.cpp
 
-.PHONY: build test preview clean esphome-clean esphome-compile esphome-flash esphome-upload esphome-logs logs esphome-rebuild esphome-reflash gen-api-key help
+.PHONY: build test preview clean format lint check esphome-clean esphome-compile esphome-flash esphome-upload esphome-logs logs esphome-rebuild esphome-reflash gen-api-key help
 
 help:
 	@echo "build           compile preview + tests"
 	@echo "test            run all tests"
 	@echo "preview         run Rainbow effect in terminal (Ctrl+C to stop)"
+	@echo "format          auto-format all sources with uncrustify"
+	@echo "lint            static analysis of all sources with clang-tidy"
+	@echo "check           run format + lint in parallel"
 	@echo "clean           remove build directory"
 	@echo "esphome-clean   remove ESPHome build artifacts"
 	@echo "esphome-version show pinned ESPHome version for HA compatibility"
@@ -71,6 +77,15 @@ test: $(BUILD_DIR)/test_xy_mapping
 
 preview: $(BUILD_DIR)/preview
 	@$(BUILD_DIR)/preview
+
+format:
+	$(UNCRUSTIFY) -c .uncrustify.cfg -l CPP --replace --no-backup $(CORE_SRCS)
+
+lint:
+	$(CLANG_TIDY) $(CORE_SRCS) -- $(CXXFLAGS)
+
+check:
+	$(MAKE) format & $(MAKE) lint & wait
 
 clean:
 	rm -rf $(BUILD_DIR)

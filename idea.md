@@ -36,6 +36,12 @@ This is not intended to be a full 1:1 clone of GyverLamp 2. The goal is to port 
 
 ---
 
+## Related docs
+
+- Agent status lamp docs: [`docs/agent-status-lamp/README.md`](docs/agent-status-lamp/README.md)
+
+---
+
 ## Hardware already bought / selected
 
 | Category | Component | Status | Notes |

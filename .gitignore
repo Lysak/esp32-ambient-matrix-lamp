@@ -4,3 +4,5 @@ build-cmake/
 .esphome/
 esphome/secrets.yaml
 .DS_Store
+screenshots
+.clang-tidy
