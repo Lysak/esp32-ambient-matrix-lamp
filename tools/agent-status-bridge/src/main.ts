@@ -1,5 +1,4 @@
 import { readFile } from "node:fs/promises";
-import { join } from "node:path";
 import { aggregateFamilyStatus } from "./aggregators/aggregateFamilyStatus.js";
 import { aggregateGlobalStatus } from "./aggregators/aggregateGlobalStatus.js";
 import {
@@ -12,6 +11,7 @@ import {
   pressHomeAssistantButton,
   setInputSelectOption,
 } from "./publishers/homeAssistantPublisher.js";
+import { getCodexEventLogPath } from "./runtime/codexPaths.js";
 import { detectFinishedSessions } from "./runtime/detectFinishedSessions.js";
 import { startFamilyStatusLoop } from "./runtime/familyStatusLoop.js";
 import type { SourceSessionSnapshot } from "./types/source.js";
@@ -25,12 +25,7 @@ try {
 
 const CLAUDE_POLL_INTERVAL_MS = 2000;
 const CODEX_POLL_INTERVAL_MS = 2000;
-const CODEX_EVENT_LOG_PATH = join(
-  import.meta.dirname,
-  "..",
-  ".runtime",
-  "codex-events.log",
-);
+const CODEX_EVENT_LOG_PATH = getCodexEventLogPath(process.env);
 
 async function readCodexEventLog(): Promise<string> {
   try {

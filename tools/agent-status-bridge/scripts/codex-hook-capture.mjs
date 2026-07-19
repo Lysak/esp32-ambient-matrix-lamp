@@ -1,20 +1,16 @@
 #!/usr/bin/env node
-// Invoked directly by Codex (see ../.codex/hooks.json at the repo root) once
-// per hook event. Imports the compiled formatter so the field-extraction
-// logic has a single source of truth (src/hooks/formatCodexHookEvent.ts) —
-// run `pnpm run build` after changing that file, or this script keeps using
-// the stale compiled output.
+// Invoked directly by Codex global hooks (`~/.codex/hooks.json`) once per hook
+// event. Imports the compiled formatter and path helper so field extraction and
+// shared log location stay in one place — run `pnpm run build` after changing
+// either source module, or this script keeps using stale compiled output.
 
 import { appendFileSync, mkdirSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { dirname } from "node:path";
 import { formatCodexHookEvent } from "../dist/src/hooks/formatCodexHookEvent.js";
+import { getDefaultCodexEventLogPath } from "../dist/src/runtime/codexPaths.js";
 
-const LOG_PATH = join(
-  import.meta.dirname,
-  "..",
-  ".runtime",
-  "codex-events.log",
-);
+const LOG_PATH =
+  process.env.CODEX_EVENT_LOG_PATH || getDefaultCodexEventLogPath();
 
 function readStdin() {
   const chunks = [];

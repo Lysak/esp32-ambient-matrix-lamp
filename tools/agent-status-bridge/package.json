@@ -11,6 +11,7 @@
     "dev": "tsx watch src/main.ts",
     "build": "tsc -p tsconfig.json",
     "test": "vitest run",
+    "install:codex-hooks": "node scripts/install-global-codex-hooks.mjs",
     "check": "biome check src test scripts package.json tsconfig.json biome.json vitest.config.ts README.md .gitignore .env.example && tsc -p tsconfig.json --noEmit",
     "format": "biome format --write src test scripts package.json tsconfig.json biome.json vitest.config.ts README.md .gitignore .env.example"
   },

@@ -56,29 +56,41 @@ surfaces instead of being silently treated as idle. See
 `src/collectors/codexCollector.ts` instead reads a raw hook event log (one
 JSON event per line) and keeps only the most recent event per session.
 
+By default that log is machine-wide:
+
+- `~/Library/Application Support/ambient-matrix-agent-status/codex-events.log`
+
+Override it only for development/tests with `CODEX_EVENT_LOG_PATH`.
+
 This scaffold does not include yet:
 
 - richer session grouping, subagent-aware aggregation, or alternative
   publishers beyond Home Assistant (see `mac-agent-status-bridge-design.md`'s
   extension strategy)
 
-`Codex` hooks are registered per-repo in `.codex/hooks.json` at the repository
-root (not in the shared `~/.codex/config.toml`, which already has an unrelated
-`notify` integration). Confirmed hook events: `SessionStart`, `Stop` -> `idle`;
-`UserPromptSubmit`, `PreToolUse`, `PostToolUse`, `SubagentStart`,
-`SubagentStop`, `PreCompact`, `PostCompact` -> `thinking`; `PermissionRequest`
--> `needs_user`. Any other event is unconfirmed and maps to `error`. See
+`Codex` hooks are registered globally in `~/.codex/hooks.json`, not per repo.
+Install or refresh them with:
+
+```bash
+pnpm run install:codex-hooks
+```
+
+Confirmed hook events: `SessionStart`, `Stop` -> `idle`; `UserPromptSubmit`,
+`PreToolUse`, `PostToolUse`, `SubagentStart`, `SubagentStop`, `PreCompact`,
+`PostCompact` -> `thinking`; `PermissionRequest` -> `needs_user`. Any other
+event is unconfirmed and maps to `error`. See
 `src/collectors/normalizeCodexStatus.ts`.
 
-Codex requires interactive trust approval (`/hooks`) the first time a
-repo-scoped hook runs. Run `codex` interactively inside this repo once and
-approve the hooks before expecting `.runtime/codex-events.log` to receive
-real events.
+Codex requires interactive trust approval (`/hooks`) the first time a global
+hook runs in a newly trusted repo. After installing the hooks, run `codex`
+interactively in any repo where you want events and approve the hooks when
+prompted.
 
 `scripts/codex-hook-capture.mjs` imports its formatting logic from
-`dist/src/hooks/formatCodexHookEvent.js`. Run `pnpm run build` after any
-change to `src/hooks/formatCodexHookEvent.ts`, or the hook keeps using the
-stale compiled output.
+`dist/src/hooks/formatCodexHookEvent.js` and
+`dist/src/runtime/codexPaths.js`. Run `pnpm run build` after any change to
+`src/hooks/formatCodexHookEvent.ts` or `src/runtime/codexPaths.ts`, or the
+hook keeps using the stale compiled output.
 
 ## Notes
 
@@ -93,14 +105,23 @@ stale compiled output.
 1. Copy `.env.example` to `.env` and fill in `HA_URL` and `HA_TOKEN` (a
    long-lived access token from your Home Assistant user profile). `.env`
    is gitignored — never commit it.
-2. In your Home Assistant `configuration.yaml`, add the `input_select`
+2. Install the global Codex hooks:
+
+```bash
+pnpm run install:codex-hooks
+```
+
+3. In your Home Assistant `configuration.yaml`, add the `input_select`
    block from `docs/agent-status-lamp/home-assistant-input-select.yaml`
    (or merge it into an existing `input_select:` key), then restart Home
    Assistant or reload `input_select` entities from Developer Tools -> YAML.
-3. Run `pnpm dev`. Without `.env`, the bridge logs
+4. Run `pnpm dev`. Without `.env`, the bridge logs
    "HA_URL/HA_TOKEN not set" and behaves exactly as before. With it
    configured, `input_select.agent_status` in Home Assistant should update
    whenever `global_status` changes in the console output.
+
+Do not keep both repo-local and global Codex hook registrations active at the
+same time. That can duplicate raw events and cause duplicate lamp flashes.
 
 The mapping from the bridge's internal statuses to Home Assistant's
 `input_select` options lives in one place:
