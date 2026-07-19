@@ -7,6 +7,12 @@ export interface FamilyStatusLoopDeps {
   aggregate: (snapshots: SourceSessionSnapshot[]) => NormalizedStatus;
   intervalMs: number;
   onStatus: (status: NormalizedStatus) => void;
+  /**
+   * Called with the raw snapshots on every poll (not just on change), so
+   * callers can run per-session edge detection without polling the source a
+   * second time. Optional; the aggregated `onStatus` behavior is unaffected.
+   */
+  onSnapshots?: (snapshots: SourceSessionSnapshot[]) => void;
 }
 
 export type StopFamilyStatusLoop = () => void;
@@ -18,6 +24,9 @@ export function startFamilyStatusLoop(
 
   const timer = setInterval(async () => {
     const snapshots = await deps.collector.poll();
+
+    deps.onSnapshots?.(snapshots);
+
     const status = deps.aggregate(snapshots);
 
     if (status !== lastStatus) {

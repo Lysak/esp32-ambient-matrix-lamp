@@ -9,9 +9,12 @@ import {
 import { createCodexCollector } from "./collectors/codexCollector.js";
 import {
   createHomeAssistantPublisher,
+  pressHomeAssistantButton,
   setInputSelectOption,
 } from "./publishers/homeAssistantPublisher.js";
+import { detectFinishedSessions } from "./runtime/detectFinishedSessions.js";
 import { startFamilyStatusLoop } from "./runtime/familyStatusLoop.js";
+import type { SourceSessionSnapshot } from "./types/source.js";
 import type { NormalizedStatus } from "./types/status.js";
 
 try {
@@ -43,6 +46,9 @@ async function readCodexEventLog(): Promise<string> {
 const haUrl = process.env.HA_URL;
 const haToken = process.env.HA_TOKEN;
 const haEntityId = process.env.HA_ENTITY_ID ?? "input_select.agent_status";
+const haFinishedButtonEntityId =
+  process.env.HA_FINISHED_BUTTON_ENTITY_ID ??
+  "button.ambient_matrix_lamp_agent_finished_flash";
 
 const publisher =
   haUrl && haToken
@@ -85,6 +91,42 @@ function publishGlobalStatusIfChanged(): void {
   }
 }
 
+/**
+ * Tracks the last seen per-session status for one family, presses the Home
+ * Assistant flash button for each session that just went `thinking` -> `idle`,
+ * then records the new statuses for the next poll.
+ */
+function makeFinishedSessionHandler(): (
+  snapshots: SourceSessionSnapshot[],
+) => void {
+  const lastStatusBySession = new Map<string, NormalizedStatus>();
+
+  return (snapshots) => {
+    const finished = detectFinishedSessions(lastStatusBySession, snapshots);
+
+    for (const session of finished) {
+      console.log(
+        `session_finished: ${session.family}/${session.label} (${session.sourceSessionId})`,
+      );
+
+      if (haUrl && haToken) {
+        pressHomeAssistantButton(
+          haUrl,
+          haToken,
+          haFinishedButtonEntityId,
+        ).catch((error: unknown) => {
+          console.error("Home Assistant button press failed:", error);
+        });
+      }
+    }
+
+    lastStatusBySession.clear();
+    for (const snapshot of snapshots) {
+      lastStatusBySession.set(snapshot.sourceSessionId, snapshot.status);
+    }
+  };
+}
+
 const claudeCollector = createClaudeCollector({ runClaudeAgentsJson });
 const codexCollector = createCodexCollector({ readCodexEventLog });
 
@@ -97,6 +139,7 @@ startFamilyStatusLoop({
     latestClaudeStatus = status;
     publishGlobalStatusIfChanged();
   },
+  onSnapshots: makeFinishedSessionHandler(),
 });
 
 startFamilyStatusLoop({
@@ -108,6 +151,7 @@ startFamilyStatusLoop({
     latestCodexStatus = status;
     publishGlobalStatusIfChanged();
   },
+  onSnapshots: makeFinishedSessionHandler(),
 });
 
 console.log("agent-status-bridge is running");

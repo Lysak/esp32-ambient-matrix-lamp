@@ -51,3 +51,29 @@ export async function setInputSelectOption(
     );
   }
 }
+
+/**
+ * Presses a Home Assistant `button` entity via the REST API. Used for the
+ * edge/pulse "agent finished" signal that a level-based `input_select` cannot
+ * represent. Thin `fetch` wrapper in the same style as `setInputSelectOption`.
+ */
+export async function pressHomeAssistantButton(
+  baseUrl: string,
+  token: string,
+  entityId: string,
+): Promise<void> {
+  const response = await fetch(`${baseUrl}/api/services/button/press`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ entity_id: entityId }),
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `Home Assistant request failed: ${response.status} ${response.statusText}`,
+    );
+  }
+}

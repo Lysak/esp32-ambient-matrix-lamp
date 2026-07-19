@@ -38,6 +38,14 @@ This scaffold includes:
 - `Home Assistant` publishing: a single aggregated `global_status` (via
   `aggregateGlobalStatus`) is published to an `input_select` entity through
   Home Assistant's REST API, whenever it changes
+- per-session "finished" signal: when an individual session goes
+  `thinking` -> `idle` (`detectFinishedSessions`), the bridge presses a Home
+  Assistant `button` entity directly (`pressHomeAssistantButton`), which the
+  lamp firmware turns into a short green blink. The button entity id is
+  configurable via `HA_FINISHED_BUTTON_ENTITY_ID` (default
+  `button.ambient_matrix_lamp_agent_finished_flash`). No Home Assistant
+  automation is involved. See
+  `docs/agent-status-lamp/` and the design spec under `docs/superpowers/specs/`.
 
 Confirmed raw `Claude Code` statuses so far: `busy` -> `thinking`, `idle` -> `idle`.
 Any other raw status is unconfirmed and is mapped to `error` on purpose, so it

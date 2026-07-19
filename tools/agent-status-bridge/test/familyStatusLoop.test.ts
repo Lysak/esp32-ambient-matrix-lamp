@@ -69,6 +69,25 @@ describe("startFamilyStatusLoop", () => {
     expect(onStatus).toHaveBeenCalledTimes(1);
   });
 
+  it("calls onSnapshots with the raw snapshots on every poll", async () => {
+    const collector = fakeCollector([[makeSnapshot("thinking")]]);
+    const onSnapshots = vi.fn();
+
+    startFamilyStatusLoop({
+      collector,
+      aggregate: aggregateFamilyStatus,
+      intervalMs: 2000,
+      onStatus: vi.fn(),
+      onSnapshots,
+    });
+
+    await vi.advanceTimersByTimeAsync(2000);
+    await vi.advanceTimersByTimeAsync(2000);
+
+    expect(onSnapshots).toHaveBeenCalledTimes(2);
+    expect(onSnapshots).toHaveBeenLastCalledWith([makeSnapshot("thinking")]);
+  });
+
   it("stops polling once stop() is called", async () => {
     const collector = fakeCollector([[makeSnapshot("thinking")]]);
     const onStatus = vi.fn();

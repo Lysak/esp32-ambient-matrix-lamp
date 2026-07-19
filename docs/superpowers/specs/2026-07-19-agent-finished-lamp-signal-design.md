@@ -24,11 +24,17 @@ effects are explicitly out of scope.
 ```
 Claude/Codex session: thinking -> idle
   -> bridge detects the per-session edge on its next poll
-  -> POST /api/events/agent_session_finished  { family, sessionId, label }
-  -> Home Assistant automation (trigger: event agent_session_finished)
-  -> button.press on the ESPHome "Agent Finished Flash" button
+  -> POST /api/services/button/press  { entity_id: <flash button> }
   -> firmware blinks green ~5s, then restores the previous effect/power
 ```
+
+The bridge presses the ESPHome button directly through the Home Assistant
+REST API. An earlier design fired a custom `agent_session_finished` event and
+translated it with a Home Assistant automation; that indirection was dropped
+for the MVP because it required deploying an automation to the HA server for
+no added value. The button entity id is configurable via
+`HA_FINISHED_BUTTON_ENTITY_ID` (default
+`button.ambient_matrix_lamp_agent_finished_flash`).
 
 ## Components
 
@@ -46,18 +52,15 @@ Repo: `tools/agent-status-bridge`.
   poll with the raw snapshots. The existing aggregated `onStatus` behavior is
   untouched. This avoids a second poll of the same source.
 - `src/publishers/homeAssistantPublisher.ts`: add a transport helper
-  `fireHomeAssistantEvent(baseUrl, token, eventType, data)` that does
-  `POST {baseUrl}/api/events/{eventType}` with the JSON body. Mirrors the
+  `pressHomeAssistantButton(baseUrl, token, entityId)` that does
+  `POST {baseUrl}/api/services/button/press` with `{ entity_id }`. Mirrors the
   existing `setInputSelectOption` thin-wrapper style (not unit-tested
   directly; exercised against a real HA instance).
 - `src/main.ts`: for each family loop, keep a
   `Map<sessionId, NormalizedStatus>` of the last seen per-session status.
-  On each `onSnapshots`, run `detectFinishedSessions`, fire an
-  `agent_session_finished` event per finished session (only when HA is
-  configured), then update the map. Log each fired event to the console.
-
-Event payload: `{ family, sessionId, label }`. `family` is `"claude"` or
-`"codex"`; `sessionId` is `sourceSessionId`; `label` is the session label.
+  On each `onSnapshots`, run `detectFinishedSessions`, press the flash button
+  once per finished session (only when HA is configured), then update the map.
+  Log each finished session to the console.
 
 ### 2. Firmware — HA-triggerable green blink
 
@@ -87,16 +90,9 @@ Repo: `esphome/common/led_matrix.yaml`.
 
 ### 3. Home Assistant repo — automation
 
-Repo: `/Users/Files/www/pet/home-assistant` (separate git repo, committed
-separately).
-
-- Add to `automations.yaml`:
-  - Trigger: `platform: event`, `event_type: agent_session_finished`.
-  - Action: `service: button.press`, target the ESPHome flash button entity.
-  - `mode: queued` (or `parallel`) so rapid consecutive finishes are not
-    dropped.
-- No new `input_select`/`input_button` entities required; the existing
-  `input_select.agent_status` block stays as-is.
+Not needed. The bridge calls `button.press` directly, so no server-side
+automation or new HA entity is required. The existing `input_select.agent_status`
+block stays as-is.
 
 ## Testing
 
