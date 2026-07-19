@@ -29,6 +29,7 @@ export function formatCodexHookEvent(
     label: asString(record.cwd),
     type: asString(record.hook_event_name),
     timestamp: nowIso,
+    turnId: asString(record.turn_id),
   };
 
   return {

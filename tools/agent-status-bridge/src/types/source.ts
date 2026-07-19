@@ -15,4 +15,6 @@ export interface SourceSessionSnapshot {
   status: NormalizedStatus;
   updatedAt: string;
   lifecycleState?: SessionLifecycleState;
+  rawEventType?: string;
+  turnId?: string;
 }

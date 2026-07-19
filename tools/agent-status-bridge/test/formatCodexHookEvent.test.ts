@@ -10,6 +10,7 @@ describe("formatCodexHookEvent", () => {
         session_id: "abc-123",
         cwd: "/Users/Files/www/pet/esp32-ambient-matrix-lamp",
         hook_event_name: "UserPromptSubmit",
+        turn_id: "turn-1",
       },
       NOW,
     );
@@ -19,6 +20,7 @@ describe("formatCodexHookEvent", () => {
       label: "/Users/Files/www/pet/esp32-ambient-matrix-lamp",
       type: "UserPromptSubmit",
       timestamp: NOW,
+      turnId: "turn-1",
     });
   });
 
@@ -34,6 +36,7 @@ describe("formatCodexHookEvent", () => {
         label: "/tmp",
         type: "Stop",
         timestamp: NOW,
+        turnId: "",
       })}\n`,
     );
   });
@@ -46,6 +49,7 @@ describe("formatCodexHookEvent", () => {
       label: "",
       type: "",
       timestamp: NOW,
+      turnId: "",
     });
   });
 

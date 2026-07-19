@@ -3,4 +3,5 @@ export interface RawCodexEvent {
   label: string;
   type: string;
   timestamp: string;
+  turnId: string;
 }

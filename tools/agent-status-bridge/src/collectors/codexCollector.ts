@@ -39,6 +39,8 @@ export function createCodexCollector(
         label: event.label,
         status: normalizeCodexStatus(event.type),
         updatedAt: event.timestamp,
+        rawEventType: event.type,
+        turnId: event.turnId,
       }));
     },
   };

@@ -99,10 +99,10 @@ function publishGlobalStatusIfChanged(): void {
 function makeFinishedSessionHandler(): (
   snapshots: SourceSessionSnapshot[],
 ) => void {
-  const lastStatusBySession = new Map<string, NormalizedStatus>();
+  const lastSnapshotBySession = new Map<string, SourceSessionSnapshot>();
 
   return (snapshots) => {
-    const finished = detectFinishedSessions(lastStatusBySession, snapshots);
+    const finished = detectFinishedSessions(lastSnapshotBySession, snapshots);
 
     for (const session of finished) {
       console.log(
@@ -120,9 +120,9 @@ function makeFinishedSessionHandler(): (
       }
     }
 
-    lastStatusBySession.clear();
+    lastSnapshotBySession.clear();
     for (const snapshot of snapshots) {
-      lastStatusBySession.set(snapshot.sourceSessionId, snapshot.status);
+      lastSnapshotBySession.set(snapshot.sourceSessionId, snapshot);
     }
   };
 }
