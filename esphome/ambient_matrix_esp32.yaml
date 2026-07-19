@@ -2,8 +2,6 @@ substitutions:
   device_name: ambient-matrix-lamp
   friendly_name: Ambient Matrix Lamp
   debug_package: !secret debug_package
-  matrix_flip_x: "false"  # set to "true" if the matrix is mirrored left/right
-  matrix_flip_y: "true"   # set to "true" if the matrix is mounted upside down
   led_pin: GPIO25   # WS2812B DATA: ESP32 GPIO25 → 470 Ω → LED DIN
   touch_pin: GPIO27 # TTP223 OUT:   ESP32 GPIO27
   i2c_sda: GPIO21   # BH1750 SDA:   ESP32 GPIO21 (I²C default)
@@ -36,6 +34,7 @@ esphome:
     - custom/log_time.h
     - custom/power_transition.h
     - custom/sunrise_renderer.h
+    - custom/preset_table.h
     - custom/effect_prefs.h
   libraries:
     - effects-core
@@ -46,13 +45,14 @@ esphome:
     priority: -100
     then:
       - lambda: |-
-          effect_prefs_load(id(current_effect).c_str());
+          preset_prefs_load(id(current_preset).c_str());
+          const Preset* p = find_preset(id(current_preset).c_str());
+          if (p) id(current_effect) = p->effect;
+          id(lamp_preset).publish_state(id(current_preset));
           id(lamp_effect).publish_state(id(current_effect));
           id(effect_speed).publish_state((float)g_effect_speed);
           id(effect_scale).publish_state((float)g_effect_scale);
-          id(effect_color).publish_state((float)g_effect_color);
           id(effect_palette).publish_state((float)g_effect_palette);
-          id(effect_from_palette).publish_state(g_effect_from_palette != 0);
       - if:
           condition:
             lambda: return id(lamp_powered);
