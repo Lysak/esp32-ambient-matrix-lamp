@@ -29,8 +29,30 @@ export const MANAGED_CODEX_HOOK_EVENTS = [
   "Stop",
 ] as const;
 
-export function getCodexHookScriptCommand(scriptPath: string): string {
-  return `${JSON.stringify(process.execPath)} ${JSON.stringify(scriptPath)}`;
+export const STABLE_NODE_BINARY_CANDIDATES = [
+  "/opt/homebrew/bin/node",
+  "/usr/local/bin/node",
+] as const;
+
+export function resolveCodexHookNodePath(
+  preferredPaths: readonly string[] = STABLE_NODE_BINARY_CANDIDATES,
+  fallbackPath = process.execPath,
+  pathExists: (path: string) => boolean = existsSync,
+): string {
+  for (const preferredPath of preferredPaths) {
+    if (pathExists(preferredPath)) {
+      return preferredPath;
+    }
+  }
+
+  return fallbackPath;
+}
+
+export function getCodexHookScriptCommand(
+  scriptPath: string,
+  nodePath = resolveCodexHookNodePath(),
+): string {
+  return `${JSON.stringify(nodePath)} ${JSON.stringify(scriptPath)}`;
 }
 
 export function buildGlobalCodexHooksConfig(

@@ -124,6 +124,21 @@ globals:
     type: bool
     restore_value: false
     initial_value: 'false'
+  # Agent-needs-user notify flash: separate save/restore slots from the
+  # green "finished" flash above, so the two can't clobber each other's
+  # saved effect/power if both fire in the same poll window.
+  - id: needs_user_flash_active
+    type: bool
+    restore_value: false
+    initial_value: 'false'
+  - id: needs_user_flash_prev_effect
+    type: std::string
+    restore_value: false
+    initial_value: '""'
+  - id: needs_user_flash_prev_powered
+    type: bool
+    restore_value: false
+    initial_value: 'false'
 switch:
   - platform: template
     id: lamp_power
@@ -680,6 +695,15 @@ button:
     on_press:
       - script.execute: agent_finished_flash
 
+  # Exposed to Home Assistant. Pressed when the agent-status bridge detects
+  # a session crossing into `needs_user` (the agent is asking a question and
+  # is blocked on a reply).
+  - platform: template
+    id: btn_agent_needs_user_flash
+    name: "Agent Needs User Flash"
+    on_press:
+      - script.execute: agent_needs_user_flash
+
 # Multi-click dispatcher: each new tap resets the 800 ms window. Sunrise is
 # schedule-driven only and does not start from the touch button.
 script:
@@ -723,6 +747,48 @@ script:
             - light.turn_on:
                 id: led_matrix
                 effect: !lambda 'return id(notify_flash_prev_effect);'
+          else:
+            - light.turn_off:
+                id: led_matrix
+
+  # Yellow "agent needs you" notification: same shape as agent_finished_flash
+  # above, but amber and its own save/restore globals so the two never fight
+  # over which effect/power state to restore.
+  - id: agent_needs_user_flash
+    mode: restart
+    then:
+      - lambda: |-
+          if (!id(needs_user_flash_active)) {
+            id(needs_user_flash_active) = true;
+            id(needs_user_flash_prev_effect) = id(current_effect);
+            id(needs_user_flash_prev_powered) = id(lamp_powered);
+          }
+          id(lamp_powered) = true;
+      - repeat:
+          count: 3
+          then:
+            - light.turn_on:
+                id: led_matrix
+                red: 100%
+                green: 60%
+                blue: 0%
+                brightness: !lambda return lamp_brightness_fraction(id(lamp_brightness_level));
+                effect: "None"
+            - delay: 350ms
+            - light.turn_off:
+                id: led_matrix
+            - delay: 250ms
+      - lambda: |-
+          id(lamp_powered) = id(needs_user_flash_prev_powered);
+          id(current_effect) = id(needs_user_flash_prev_effect);
+          id(needs_user_flash_active) = false;
+      - if:
+          condition:
+            lambda: 'return id(needs_user_flash_prev_powered);'
+          then:
+            - light.turn_on:
+                id: led_matrix
+                effect: !lambda 'return id(needs_user_flash_prev_effect);'
           else:
             - light.turn_off:
                 id: led_matrix

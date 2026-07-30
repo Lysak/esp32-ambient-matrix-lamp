@@ -46,6 +46,12 @@ This scaffold includes:
   `button.ambient_matrix_lamp_agent_finished_flash`). No Home Assistant
   automation is involved. See
   `docs/agent-status-lamp/` and the design spec under `docs/superpowers/specs/`.
+- per-session "needs you" signal: when an individual session crosses into
+  `needs_user` (`detectNeedsUserSessions`), the bridge presses a second
+  `button` entity the same way, which the lamp firmware turns into a short
+  amber/yellow blink instead of green. Configurable via
+  `HA_NEEDS_USER_BUTTON_ENTITY_ID` (default
+  `button.ambient_matrix_lamp_agent_needs_user_flash`).
 
 Confirmed raw `Claude Code` statuses so far: `busy` -> `thinking`, `idle` -> `idle`.
 Any other raw status is unconfirmed and is mapped to `error` on purpose, so it
@@ -74,6 +80,10 @@ Install or refresh them with:
 ```bash
 pnpm run install:codex-hooks
 ```
+
+The installer prefers a stable Node symlink such as `/opt/homebrew/bin/node`
+or `/usr/local/bin/node` when one exists, so `~/.codex/hooks.json` does not
+drift to a versioned Homebrew Cellar path that breaks after Node upgrades.
 
 Confirmed hook events: `SessionStart`, `Stop` -> `idle`; `UserPromptSubmit`,
 `PreToolUse`, `PostToolUse`, `SubagentStart`, `SubagentStop`, `PreCompact`,
@@ -119,9 +129,37 @@ pnpm run install:codex-hooks
    "HA_URL/HA_TOKEN not set" and behaves exactly as before. With it
    configured, `input_select.agent_status` in Home Assistant should update
    whenever `global_status` changes in the console output.
+5. For it to survive logout/reboot instead of only running while `pnpm dev`
+   is open in a terminal, install it as a macOS launchd agent:
+
+```bash
+pnpm run install:launchd
+```
+
+This builds the project, writes
+`~/Library/LaunchAgents/com.ambientmatrix.agentstatusbridge.plist` (pointing
+at this checkout's `dist/src/main.js`, with `RunAtLoad` and `KeepAlive`), and
+loads it. It sets its own `PATH` (`/opt/homebrew/bin`, `~/.local/bin`, plus
+the standard system dirs), because launchd does not source your shell
+profile — without it the bridge's `claude agents --json --all` spawn fails
+with `ENOENT`. Logs still go to
+`~/Library/Logs/agent-status-bridge/bridge.log`. Re-run the command any time
+the repo moves or `dist/` changes. To stop it:
+`launchctl unload ~/Library/LaunchAgents/com.ambientmatrix.agentstatusbridge.plist`.
+See `src/runtime/launchAgent.ts` and `scripts/install-launchd-agent.mjs`.
 
 Do not keep both repo-local and global Codex hook registrations active at the
 same time. That can duplicate raw events and cause duplicate lamp flashes.
+
+The bridge also refuses to run a second instance of itself: on startup it
+takes a PID lock at
+`~/Library/Application Support/ambient-matrix-agent-status/bridge.pid`
+(override with `AGENT_STATUS_BRIDGE_LOCK_PATH`, mainly for tests). If a live
+process already holds the lock, the new instance logs an error and exits
+instead of starting a second poll loop that would independently detect the
+same finished session and double- (or triple-) fire the Home Assistant flash
+button. A stale lock left behind by a killed process is reclaimed
+automatically. See `src/runtime/singletonLock.ts`.
 
 The mapping from the bridge's internal statuses to Home Assistant's
 `input_select` options lives in one place:

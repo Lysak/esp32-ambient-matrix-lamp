@@ -9,7 +9,10 @@ const execFileAsync = promisify(execFile);
 interface RawClaudeSession {
   sessionId: string;
   name: string;
-  status: string;
+  /** Present on `kind: "interactive"` sessions. */
+  status?: string;
+  /** Present on `kind: "background"` sessions instead of `status`. */
+  state?: string;
 }
 
 export interface ClaudeCollectorDeps {
@@ -29,7 +32,7 @@ export function createClaudeCollector(
         family: "claude",
         sourceSessionId: session.sessionId,
         label: session.name,
-        status: normalizeClaudeStatus(session.status),
+        status: normalizeClaudeStatus(session.status ?? session.state),
         updatedAt: polledAt,
       }));
     },

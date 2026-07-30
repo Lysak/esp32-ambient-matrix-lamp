@@ -48,6 +48,36 @@ describe("createClaudeCollector", () => {
     ]);
   });
 
+  it("normalizes a finished background session's `state` to the done status instead of error", async () => {
+    const RAW_OUTPUT = JSON.stringify([
+      {
+        id: "ca970034",
+        cwd: "/Users/Files/www/work/api-php-backend",
+        kind: "background",
+        startedAt: 1785162714230,
+        sessionId: "ca970034-5137-4645-b0b0-7dffa9ece7ba",
+        name: "Debug permission_object deletion",
+        state: "done",
+      },
+    ]);
+
+    const collector = createClaudeCollector({
+      runClaudeAgentsJson: async () => RAW_OUTPUT,
+    });
+
+    const snapshots = await collector.poll();
+
+    expect(snapshots).toEqual([
+      {
+        family: "claude",
+        sourceSessionId: "ca970034-5137-4645-b0b0-7dffa9ece7ba",
+        label: "Debug permission_object deletion",
+        status: "done",
+        updatedAt: expect.any(String),
+      },
+    ]);
+  });
+
   it("returns an empty array when no sessions are running", async () => {
     const collector = createClaudeCollector({
       runClaudeAgentsJson: async () => "[]",

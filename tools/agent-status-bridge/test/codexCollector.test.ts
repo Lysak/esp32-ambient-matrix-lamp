@@ -24,6 +24,7 @@ describe("createCodexCollector", () => {
 
     const collector = createCodexCollector({
       readCodexEventLog: async () => RAW_LOG,
+      now: () => Date.parse("2026-07-16T00:00:05.000Z"),
     });
 
     const snapshots = await collector.poll();
@@ -68,6 +69,7 @@ describe("createCodexCollector", () => {
 
     const collector = createCodexCollector({
       readCodexEventLog: async () => RAW_LOG,
+      now: () => Date.parse("2026-07-16T00:00:10.000Z"),
     });
 
     const snapshots = await collector.poll();
@@ -90,6 +92,44 @@ describe("createCodexCollector", () => {
         updatedAt: "2026-07-16T00:00:01.000Z",
         rawEventType: "PermissionRequest",
         turnId: "turn-9",
+      },
+    ]);
+  });
+
+  it("skips events with an empty sessionId instead of treating them as a phantom session", async () => {
+    const RAW_LOG = [
+      line({
+        sessionId: "",
+        label: "",
+        type: "",
+        timestamp: "2026-07-26T09:34:24.341Z",
+        turnId: "",
+      }),
+      line({
+        sessionId: "a1",
+        label: "codex-1",
+        type: "Stop",
+        timestamp: "2026-07-16T00:00:10.000Z",
+        turnId: "turn-1",
+      }),
+    ].join("\n");
+
+    const collector = createCodexCollector({
+      readCodexEventLog: async () => RAW_LOG,
+      now: () => Date.parse("2026-07-16T00:00:10.000Z"),
+    });
+
+    const snapshots = await collector.poll();
+
+    expect(snapshots).toEqual([
+      {
+        family: "codex",
+        sourceSessionId: "a1",
+        label: "codex-1",
+        status: "idle",
+        updatedAt: "2026-07-16T00:00:10.000Z",
+        rawEventType: "Stop",
+        turnId: "turn-1",
       },
     ]);
   });
@@ -123,6 +163,7 @@ describe("createCodexCollector", () => {
 
     const collector = createCodexCollector({
       readCodexEventLog: async () => RAW_LOG,
+      now: () => Date.parse("2026-07-16T00:00:10.000Z"),
     });
 
     const snapshots = await collector.poll();
@@ -138,5 +179,22 @@ describe("createCodexCollector", () => {
         turnId: "turn-1",
       },
     ]);
+  });
+
+  it("drops a session whose last event is older than the staleness window", async () => {
+    const RAW_LOG = line({
+      sessionId: "zombie",
+      label: "codex-old",
+      type: "PermissionRequest",
+      timestamp: "2026-07-16T00:00:00.000Z",
+      turnId: "turn-1",
+    });
+
+    const collector = createCodexCollector({
+      readCodexEventLog: async () => RAW_LOG,
+      now: () => Date.parse("2026-07-16T00:31:00.000Z"),
+    });
+
+    expect(await collector.poll()).toEqual([]);
   });
 });

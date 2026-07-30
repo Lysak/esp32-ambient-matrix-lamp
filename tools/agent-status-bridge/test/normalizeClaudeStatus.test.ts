@@ -17,4 +17,8 @@ describe("normalizeClaudeStatus", () => {
   it("maps any unconfirmed raw status to 'error' so it is visible, not silently ignored", () => {
     expect(normalizeClaudeStatus("some_future_status")).toBe("error");
   });
+
+  it("maps a background session's confirmed 'done' state to 'done'", () => {
+    expect(normalizeClaudeStatus("done")).toBe("done");
+  });
 });
