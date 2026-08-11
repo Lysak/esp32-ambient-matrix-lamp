@@ -1,16 +1,14 @@
 import { readFile } from "node:fs/promises";
 import { aggregateFamilyStatus } from "./aggregators/aggregateFamilyStatus.js";
 import { aggregateGlobalStatus } from "./aggregators/aggregateGlobalStatus.js";
-import {
-  createClaudeCollector,
-  runClaudeAgentsJson,
-} from "./collectors/claudeCollector.js";
+import { createClaudeCollector } from "./collectors/claudeCollector.js";
 import { createCodexCollector } from "./collectors/codexCollector.js";
 import {
   createHomeAssistantPublisher,
   pressHomeAssistantButton,
   setInputSelectOption,
 } from "./publishers/homeAssistantPublisher.js";
+import { getClaudeEventLogPath } from "./runtime/claudePaths.js";
 import { getCodexEventLogPath } from "./runtime/codexPaths.js";
 import { detectFinishedSessions } from "./runtime/detectFinishedSessions.js";
 import { detectNeedsUserSessions } from "./runtime/detectNeedsUserSessions.js";
@@ -52,11 +50,12 @@ process.on("SIGTERM", () => process.exit(0));
 
 const CLAUDE_POLL_INTERVAL_MS = 2000;
 const CODEX_POLL_INTERVAL_MS = 2000;
+const CLAUDE_EVENT_LOG_PATH = getClaudeEventLogPath(process.env);
 const CODEX_EVENT_LOG_PATH = getCodexEventLogPath(process.env);
 
-async function readCodexEventLog(): Promise<string> {
+async function readEventLog(path: string): Promise<string> {
   try {
-    return await readFile(CODEX_EVENT_LOG_PATH, "utf8");
+    return await readFile(path, "utf8");
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") {
       return "";
@@ -64,6 +63,9 @@ async function readCodexEventLog(): Promise<string> {
     throw error;
   }
 }
+
+const readClaudeEventLog = () => readEventLog(CLAUDE_EVENT_LOG_PATH);
+const readCodexEventLog = () => readEventLog(CODEX_EVENT_LOG_PATH);
 
 const haUrl = process.env.HA_URL;
 const haToken = process.env.HA_TOKEN;
@@ -183,7 +185,7 @@ function makeFinishedSessionHandler(): (
   };
 }
 
-const claudeCollector = createClaudeCollector({ runClaudeAgentsJson });
+const claudeCollector = createClaudeCollector({ readClaudeEventLog });
 const codexCollector = createCodexCollector({ readCodexEventLog });
 
 startFamilyStatusLoop({

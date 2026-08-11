@@ -1,13 +1,15 @@
 import type { SourceSessionSnapshot } from "../types/source.js";
 /**
  * Returns the sessions that just finished a unit of work: their normalized
- * state crossed the family-specific "turn finished" edge between the previous
- * poll and the current snapshots. This is the per-session "agent finished"
- * edge.
+ * state crossed the "turn finished" edge between the previous poll and the
+ * current snapshots. This is the per-session "agent finished" edge.
  *
- * Claude: the clean `thinking` -> `idle` edge.
- * Codex: a newly observed `Stop` hook event for the session, even if the poll
- * loop missed the intermediate `thinking` snapshot.
+ * Both families are hook-log based (`rawEventType` set): a newly observed
+ * `Stop` hook event for the session counts as finished, even if the poll
+ * loop missed the intermediate `thinking` snapshot. Codex additionally
+ * carries a `turnId`, so it's compared too when present. Any snapshot
+ * without `rawEventType` (none currently) falls back to the clean
+ * `thinking` -> `idle` edge.
  */
 export function detectFinishedSessions(
   previous: Map<string, SourceSessionSnapshot>,
@@ -19,7 +21,7 @@ export function detectFinishedSessions(
       return false;
     }
 
-    if (snapshot.family === "codex") {
+    if (snapshot.rawEventType !== undefined) {
       return (
         snapshot.rawEventType === "Stop" &&
         (snapshot.turnId !== prior.turnId ||

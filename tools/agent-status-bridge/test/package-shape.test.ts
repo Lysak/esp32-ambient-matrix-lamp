@@ -19,6 +19,9 @@ describe("package shape", () => {
     expect(packageJson.scripts["install:codex-hooks"]).toBe(
       "node scripts/install-global-codex-hooks.mjs",
     );
+    expect(packageJson.scripts["install:claude-hooks"]).toBe(
+      "node scripts/install-global-claude-hooks.mjs",
+    );
     expect(packageJson.scripts.check).toBe(
       "biome check src test scripts package.json tsconfig.json biome.json vitest.config.ts README.md .gitignore .env.example && tsc -p tsconfig.json --noEmit",
     );

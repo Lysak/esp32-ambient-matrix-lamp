@@ -30,6 +30,7 @@ export const MANAGED_CODEX_HOOK_EVENTS = [
 ] as const;
 
 export const STABLE_NODE_BINARY_CANDIDATES = [
+  "/opt/homebrew/opt/node@24/bin/node",
   "/opt/homebrew/bin/node",
   "/usr/local/bin/node",
 ] as const;
@@ -66,7 +67,16 @@ export function buildGlobalCodexHooksConfig(
       : {};
 
   for (const eventName of MANAGED_CODEX_HOOK_EVENTS) {
+    const existingEventHooks = preservedHooks[eventName] ?? [];
+    const unrelatedEventHooks = existingEventHooks.filter(
+      ({ hooks }) =>
+        !hooks.some(({ command: existingCommand }) =>
+          existingCommand.includes(scriptPath),
+        ),
+    );
+
     preservedHooks[eventName] = [
+      ...unrelatedEventHooks,
       {
         matcher: ".*",
         hooks: [

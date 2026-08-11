@@ -118,4 +118,37 @@ describe("detectFinishedSessions", () => {
 
     expect(detectFinishedSessions(previous, current)).toEqual([]);
   });
+
+  it("treats a newly observed Claude Stop hook event as finished even when the previous poll missed thinking", () => {
+    const previous = new Map<string, SourceSessionSnapshot>([
+      [
+        "s1",
+        makeSnapshot("claude", "s1", "idle", {
+          rawEventType: "Stop",
+          updatedAt: "2026-07-19T00:00:01.000Z",
+        }),
+      ],
+    ]);
+    const current = [
+      makeSnapshot("claude", "s1", "idle", {
+        rawEventType: "Stop",
+        updatedAt: "2026-07-19T00:00:05.000Z",
+      }),
+    ];
+
+    expect(detectFinishedSessions(previous, current)).toEqual(current);
+  });
+
+  it("does not repeat the same Claude Stop hook event on later polls", () => {
+    const previousSnapshot = makeSnapshot("claude", "s1", "idle", {
+      rawEventType: "Stop",
+      updatedAt: "2026-07-19T00:00:05.000Z",
+    });
+    const previous = new Map<string, SourceSessionSnapshot>([
+      ["s1", previousSnapshot],
+    ]);
+    const current = [previousSnapshot];
+
+    expect(detectFinishedSessions(previous, current)).toEqual([]);
+  });
 });

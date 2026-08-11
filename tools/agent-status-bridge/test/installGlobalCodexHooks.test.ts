@@ -44,4 +44,42 @@ describe("install-global-codex-hooks", () => {
       ),
     ).toBe("/tmp/custom-node");
   });
+
+  it("preserves unrelated hooks while replacing a prior bridge command", () => {
+    const scriptPath = "/tmp/codex-hook-capture.mjs";
+    const config = buildGlobalCodexHooksConfig(scriptPath, {
+      hooks: {
+        Stop: [
+          {
+            matcher: ".*",
+            hooks: [
+              {
+                type: "command",
+                command: "'/tmp/agterm-status.sh' stop",
+                timeout: 5,
+              },
+            ],
+          },
+          {
+            matcher: ".*",
+            hooks: [
+              {
+                type: "command",
+                command: '"/old/node" "/tmp/codex-hook-capture.mjs"',
+                timeout: 5,
+              },
+            ],
+          },
+        ],
+      },
+    });
+
+    expect(config.hooks.Stop).toHaveLength(2);
+    expect(config.hooks.Stop?.[0]?.hooks[0]?.command).toBe(
+      "'/tmp/agterm-status.sh' stop",
+    );
+    expect(config.hooks.Stop?.[1]?.hooks[0]?.command).toBe(
+      getCodexHookScriptCommand(scriptPath),
+    );
+  });
 });

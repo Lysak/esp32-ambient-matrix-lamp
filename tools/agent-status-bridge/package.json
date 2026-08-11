@@ -12,6 +12,7 @@
     "build": "tsc -p tsconfig.json",
     "test": "vitest run",
     "install:codex-hooks": "node scripts/install-global-codex-hooks.mjs",
+    "install:claude-hooks": "node scripts/install-global-claude-hooks.mjs",
     "install:launchd": "pnpm run build && node scripts/install-launchd-agent.mjs",
     "check": "biome check src test scripts package.json tsconfig.json biome.json vitest.config.ts README.md .gitignore .env.example && tsc -p tsconfig.json --noEmit",
     "format": "biome format --write src test scripts package.json tsconfig.json biome.json vitest.config.ts README.md .gitignore .env.example"
