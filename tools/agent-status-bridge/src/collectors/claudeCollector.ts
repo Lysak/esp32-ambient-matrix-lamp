@@ -34,6 +34,7 @@ export function createClaudeCollector(
   deps: ClaudeCollectorDeps,
 ): Collector<SourceSessionSnapshot> {
   const now = deps.now ?? (() => Date.now());
+  const latestBySession = new Map<string, RawClaudeEvent>();
 
   return {
     async poll() {
@@ -49,7 +50,6 @@ export function createClaudeCollector(
           }
         });
 
-      const latestBySession = new Map<string, RawClaudeEvent>();
       for (const event of events) {
         if (!event.sessionId) {
           // A hook fired with an empty/missing sessionId (observed from a

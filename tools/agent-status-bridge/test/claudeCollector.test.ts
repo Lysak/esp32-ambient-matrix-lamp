@@ -88,6 +88,32 @@ describe("createClaudeCollector", () => {
     ]);
   });
 
+  it("retains known sessions when later polls contain only appended events", async () => {
+    const logs = [
+      line({
+        sessionId: "s1",
+        label: "claude-1",
+        type: "UserPromptSubmit",
+        timestamp: "2026-08-08T00:00:05.000Z",
+      }),
+      line({
+        sessionId: "s2",
+        label: "claude-2",
+        type: "Stop",
+        timestamp: "2026-08-08T00:00:10.000Z",
+      }),
+    ];
+    let poll = 0;
+    const collector = createClaudeCollector({
+      readClaudeEventLog: async () => logs[poll++] ?? "",
+      now: () => Date.parse("2026-08-08T00:00:10.000Z"),
+    });
+
+    await collector.poll();
+
+    expect(await collector.poll()).toHaveLength(2);
+  });
+
   it("skips events with an empty sessionId instead of treating them as a phantom session", async () => {
     const RAW_LOG = [
       line({

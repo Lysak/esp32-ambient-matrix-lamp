@@ -53,6 +53,27 @@ export async function setInputSelectOption(
 }
 
 /**
+ * Read-only liveness probe against Home Assistant's base API endpoint. Used
+ * by the network-recovery health check loop in `main.ts` to detect a lost Mac
+ * Wi-Fi route independently of whether a status change happens to be
+ * publishing at the time.
+ */
+export async function checkHomeAssistantHealth(
+  baseUrl: string,
+  token: string,
+): Promise<void> {
+  const response = await fetch(`${baseUrl}/api/`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `Home Assistant health check failed: ${response.status} ${response.statusText}`,
+    );
+  }
+}
+
+/**
  * Presses a Home Assistant `button` entity via the REST API. Used for the
  * edge/pulse "agent finished" signal that a level-based `input_select` cannot
  * represent. Thin `fetch` wrapper in the same style as `setInputSelectOption`.

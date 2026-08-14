@@ -23,6 +23,7 @@ export function createCodexCollector(
   deps: CodexCollectorDeps,
 ): Collector<SourceSessionSnapshot> {
   const now = deps.now ?? (() => Date.now());
+  const latestBySession = new Map<string, RawCodexEvent>();
 
   return {
     async poll() {
@@ -38,7 +39,6 @@ export function createCodexCollector(
           }
         });
 
-      const latestBySession = new Map<string, RawCodexEvent>();
       for (const event of events) {
         if (!event.sessionId) {
           // A hook fired with an empty/missing sessionId (observed from a

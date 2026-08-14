@@ -39,6 +39,7 @@ This is not intended to be a full 1:1 clone of GyverLamp 2. The goal is to port 
 ## Related docs
 
 - Agent status lamp docs: [`docs/agent-status-lamp/README.md`](docs/agent-status-lamp/README.md)
+- Bridge recovery: [`docs/superpowers/specs/2026-08-14-agent-status-bridge-network-recovery-design.md`](docs/superpowers/specs/2026-08-14-agent-status-bridge-network-recovery-design.md)
 
 ---
 

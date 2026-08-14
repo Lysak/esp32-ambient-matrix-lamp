@@ -35,8 +35,22 @@ export interface WatchdogAgentOptions {
  * has no `KeepAlive` itself — it's meant to exit immediately each run, not
  * stay resident.
  */
+/**
+ * Plist `<string>` content is XML text, so `&` (and `<`/`>`, though only `&`
+ * is strictly required) in the shell command must be entity-escaped or the
+ * plist is not well-formed XML and fails to load.
+ */
+function escapeXmlText(value: string): string {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+}
+
 export function buildWatchdogPlist(options: WatchdogAgentOptions): string {
-  const checkAndBootstrap = `launchctl print "gui/$(id -u)/${options.mainLabel}" >/dev/null 2>&1 || launchctl bootstrap "gui/$(id -u)" "${options.mainPlistPath}"`;
+  const checkAndBootstrap = escapeXmlText(
+    `launchctl print "gui/$(id -u)/${options.mainLabel}" >/dev/null 2>&1 || launchctl bootstrap "gui/$(id -u)" "${options.mainPlistPath}"`,
+  );
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">

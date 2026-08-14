@@ -36,6 +36,11 @@ export interface LaunchAgentOptions {
  * launchd runs agents with a bare PATH (no shell profile sourced), so the
  * bridge's `claude agents --json --all` spawn fails with ENOENT unless PATH
  * is set explicitly here.
+ *
+ * `ThrottleInterval` bounds how often `KeepAlive` may restart the process
+ * (min 30s between attempts): the bridge exits with code 1 on a lost Wi-Fi
+ * route, and without a throttle a still-booting router would make launchd
+ * respawn it in a tight loop.
  */
 export function buildLaunchAgentPlist(options: LaunchAgentOptions): string {
   return `<?xml version="1.0" encoding="UTF-8"?>
@@ -60,6 +65,8 @@ export function buildLaunchAgentPlist(options: LaunchAgentOptions): string {
   <true/>
   <key>KeepAlive</key>
   <true/>
+  <key>ThrottleInterval</key>
+  <integer>30</integer>
   <key>StandardOutPath</key>
   <string>${options.logPath}</string>
   <key>StandardErrorPath</key>

@@ -1,9 +1,9 @@
-import { readFile } from "node:fs/promises";
 import { aggregateFamilyStatus } from "./aggregators/aggregateFamilyStatus.js";
 import { aggregateGlobalStatus } from "./aggregators/aggregateGlobalStatus.js";
 import { createClaudeCollector } from "./collectors/claudeCollector.js";
 import { createCodexCollector } from "./collectors/codexCollector.js";
 import {
+  checkHomeAssistantHealth,
   createHomeAssistantPublisher,
   pressHomeAssistantButton,
   setInputSelectOption,
@@ -12,7 +12,9 @@ import { getClaudeEventLogPath } from "./runtime/claudePaths.js";
 import { getCodexEventLogPath } from "./runtime/codexPaths.js";
 import { detectFinishedSessions } from "./runtime/detectFinishedSessions.js";
 import { detectNeedsUserSessions } from "./runtime/detectNeedsUserSessions.js";
+import { createEventLogTailer } from "./runtime/eventLogTailer.js";
 import { startFamilyStatusLoop } from "./runtime/familyStatusLoop.js";
+import { isRouteFailureError } from "./runtime/routeFailure.js";
 import {
   acquireSingletonLock,
   getSingletonLockPath,
@@ -48,24 +50,13 @@ process.on("exit", () => {
 process.on("SIGINT", () => process.exit(0));
 process.on("SIGTERM", () => process.exit(0));
 
-const CLAUDE_POLL_INTERVAL_MS = 2000;
-const CODEX_POLL_INTERVAL_MS = 2000;
+const CLAUDE_POLL_INTERVAL_MS = 5000;
+const CODEX_POLL_INTERVAL_MS = 5000;
 const CLAUDE_EVENT_LOG_PATH = getClaudeEventLogPath(process.env);
 const CODEX_EVENT_LOG_PATH = getCodexEventLogPath(process.env);
 
-async function readEventLog(path: string): Promise<string> {
-  try {
-    return await readFile(path, "utf8");
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-      return "";
-    }
-    throw error;
-  }
-}
-
-const readClaudeEventLog = () => readEventLog(CLAUDE_EVENT_LOG_PATH);
-const readCodexEventLog = () => readEventLog(CODEX_EVENT_LOG_PATH);
+const readClaudeEventLog = createEventLogTailer(CLAUDE_EVENT_LOG_PATH);
+const readCodexEventLog = createEventLogTailer(CODEX_EVENT_LOG_PATH);
 
 const haUrl = process.env.HA_URL;
 const haToken = process.env.HA_TOKEN;
@@ -94,6 +85,29 @@ if (publisher) {
   );
 }
 
+/**
+ * A lost Mac Wi-Fi route surfaces as `EHOSTUNREACH`/`ENETUNREACH` from
+ * `fetch`. Restarting the process can't fix an HTTP error or a bad token, but
+ * it does let the `KeepAlive` LaunchAgent retry the route itself once the
+ * router is back, so only route failures exit here.
+ */
+function handleHomeAssistantError(context: string, error: unknown): void {
+  console.error(`Home Assistant ${context} failed:`, error);
+  if (isRouteFailureError(error)) {
+    console.error(`Route lost (${context}); exiting for LaunchAgent restart`);
+    process.exit(1);
+  }
+}
+
+const HEALTH_CHECK_INTERVAL_MS = 30_000;
+if (haUrl && haToken) {
+  setInterval(() => {
+    checkHomeAssistantHealth(haUrl, haToken).catch((error: unknown) => {
+      handleHomeAssistantError("health check", error);
+    });
+  }, HEALTH_CHECK_INTERVAL_MS);
+}
+
 let latestClaudeStatus: NormalizedStatus = "idle";
 let latestCodexStatus: NormalizedStatus = "idle";
 let lastPublishedGlobalStatus: NormalizedStatus | undefined;
@@ -113,7 +127,7 @@ function publishGlobalStatusIfChanged(): void {
 
   if (publisher) {
     publisher.publishGlobalStatus(globalStatus).catch((error: unknown) => {
-      console.error("Home Assistant publish failed:", error);
+      handleHomeAssistantError("publish", error);
     });
   }
 }
@@ -146,7 +160,7 @@ function pressButton(entityId: string): void {
   lastPressAtByEntityId.set(entityId, now);
 
   pressHomeAssistantButton(haUrl, haToken, entityId).catch((error: unknown) => {
-    console.error("Home Assistant button press failed:", error);
+    handleHomeAssistantError("button press", error);
   });
 }
 

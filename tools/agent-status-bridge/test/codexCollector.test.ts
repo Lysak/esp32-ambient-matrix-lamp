@@ -96,6 +96,34 @@ describe("createCodexCollector", () => {
     ]);
   });
 
+  it("retains known sessions when later polls contain only appended events", async () => {
+    const logs = [
+      line({
+        sessionId: "a1",
+        label: "codex-1",
+        type: "UserPromptSubmit",
+        timestamp: "2026-07-16T00:00:05.000Z",
+        turnId: "turn-1",
+      }),
+      line({
+        sessionId: "b2",
+        label: "codex-2",
+        type: "Stop",
+        timestamp: "2026-07-16T00:00:10.000Z",
+        turnId: "turn-2",
+      }),
+    ];
+    let poll = 0;
+    const collector = createCodexCollector({
+      readCodexEventLog: async () => logs[poll++] ?? "",
+      now: () => Date.parse("2026-07-16T00:00:10.000Z"),
+    });
+
+    await collector.poll();
+
+    expect(await collector.poll()).toHaveLength(2);
+  });
+
   it("skips events with an empty sessionId instead of treating them as a phantom session", async () => {
     const RAW_LOG = [
       line({
