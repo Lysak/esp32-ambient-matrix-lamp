@@ -110,32 +110,27 @@ globals:
     type: std::string
     restore_value: true
     initial_value: '"Perlin Warm (Original)"'
-  # Agent-finished notify flash: remembers the effect and power state to
-  # restore after a short green blink triggered from Home Assistant.
-  - id: notify_flash_active
+  # Agent notify flash (green "finished" / amber "needs you"): one shared
+  # save/restore slot so overlapping flashes queue instead of racing on
+  # which one captured the real pre-flash effect/power state. See
+  # run_notify_flash below.
+  - id: flash_active
     type: bool
     restore_value: false
     initial_value: 'false'
-  - id: notify_flash_prev_effect
+  - id: flash_prev_effect
     type: std::string
     restore_value: false
     initial_value: '""'
-  - id: notify_flash_prev_powered
+  - id: flash_prev_powered
     type: bool
     restore_value: false
     initial_value: 'false'
-  # Agent-needs-user notify flash: separate save/restore slots from the
-  # green "finished" flash above, so the two can't clobber each other's
-  # saved effect/power if both fire in the same poll window.
-  - id: needs_user_flash_active
+  - id: flash_pending_green
     type: bool
     restore_value: false
     initial_value: 'false'
-  - id: needs_user_flash_prev_effect
-    type: std::string
-    restore_value: false
-    initial_value: '""'
-  - id: needs_user_flash_prev_powered
+  - id: flash_pending_amber
     type: bool
     restore_value: false
     initial_value: 'false'
@@ -693,7 +688,8 @@ button:
     id: btn_agent_finished_flash
     name: "Agent Finished Flash"
     on_press:
-      - script.execute: agent_finished_flash
+      - lambda: 'id(flash_pending_green) = true;'
+      - script.execute: run_notify_flash
 
   # Exposed to Home Assistant. Pressed when the agent-status bridge detects
   # a session crossing into `needs_user` (the agent is asking a question and
@@ -702,93 +698,88 @@ button:
     id: btn_agent_needs_user_flash
     name: "Agent Needs User Flash"
     on_press:
-      - script.execute: agent_needs_user_flash
+      - lambda: 'id(flash_pending_amber) = true;'
+      - script.execute: run_notify_flash
 
 # Multi-click dispatcher: each new tap resets the 800 ms window. Sunrise is
 # schedule-driven only and does not start from the touch button.
 script:
-  # Green "agent finished" notification: blink green a few times, then restore
-  # whatever effect and power state the lamp had before. mode: restart so a new
-  # finish while already blinking restarts cleanly without overlapping.
-  - id: agent_finished_flash
-    mode: restart
+  # Agent notify flash: blinks green ("finished") and/or amber ("needs you"),
+  # then restores whatever effect and power state the lamp had before any of
+  # this run's flashes started.
+  #
+  # mode: single — a press while already running does NOT start a second,
+  # overlapping instance. Each button's on_press sets its own
+  # flash_pending_* flag first and then calls this script, so a press that
+  # arrives mid-flash just queues its color: the active run drains
+  # flash_pending_green before flash_pending_amber (fixed priority, not
+  # arrival order — green always reports before amber), and only captures/
+  # restores flash_prev_effect/flash_prev_powered once, at the very start
+  # and very end of the whole queued run. This is what avoids the old race
+  # where two independent flash scripts each captured "previous power
+  # state" mid-flight and could restore the lamp to the wrong (fully on)
+  # state.
+  - id: run_notify_flash
+    mode: single
     then:
       - lambda: |-
-          if (!id(notify_flash_active)) {
-            id(notify_flash_active) = true;
-            id(notify_flash_prev_effect) = id(current_effect);
-            id(notify_flash_prev_powered) = id(lamp_powered);
-          }
+          id(flash_active) = true;
+          id(flash_prev_effect) = id(current_effect);
+          id(flash_prev_powered) = id(lamp_powered);
           id(lamp_powered) = true;
-      - repeat:
-          count: 3
+      - while:
+          condition:
+            lambda: 'return id(flash_pending_green) || id(flash_pending_amber);'
           then:
-            - light.turn_on:
-                id: led_matrix
-                red: 0%
-                green: 100%
-                blue: 0%
-                # Follow the lamp's current brightness level, like every other
-                # effect, so the flash never looks brighter than the lamp.
-                brightness: !lambda return lamp_brightness_fraction(id(lamp_brightness_level));
-                effect: "None"
-            - delay: 350ms
-            - light.turn_off:
-                id: led_matrix
-            - delay: 250ms
+            - if:
+                condition:
+                  lambda: 'return id(flash_pending_green);'
+                then:
+                  - lambda: 'id(flash_pending_green) = false;'
+                  - repeat:
+                      count: 3
+                      then:
+                        - light.turn_on:
+                            id: led_matrix
+                            red: 0%
+                            green: 100%
+                            blue: 0%
+                            # Follow the lamp's current brightness level, like
+                            # every other effect, so the flash never looks
+                            # brighter than the lamp.
+                            brightness: !lambda return lamp_brightness_fraction(id(lamp_brightness_level));
+                            effect: "None"
+                        - delay: 350ms
+                        - light.turn_off:
+                            id: led_matrix
+                        - delay: 250ms
+                else:
+                  - lambda: 'id(flash_pending_amber) = false;'
+                  - repeat:
+                      count: 3
+                      then:
+                        - light.turn_on:
+                            id: led_matrix
+                            red: 100%
+                            green: 60%
+                            blue: 0%
+                            brightness: !lambda return lamp_brightness_fraction(id(lamp_brightness_level));
+                            effect: "None"
+                        - delay: 350ms
+                        - light.turn_off:
+                            id: led_matrix
+                        - delay: 250ms
       - lambda: |-
-          id(lamp_powered) = id(notify_flash_prev_powered);
-          id(current_effect) = id(notify_flash_prev_effect);
-          id(notify_flash_active) = false;
+          id(lamp_powered) = id(flash_prev_powered);
+          id(current_effect) = id(flash_prev_effect);
+          id(flash_active) = false;
       - if:
           condition:
-            lambda: 'return id(notify_flash_prev_powered);'
+            lambda: 'return id(flash_prev_powered);'
           then:
             - light.turn_on:
                 id: led_matrix
-                effect: !lambda 'return id(notify_flash_prev_effect);'
-          else:
-            - light.turn_off:
-                id: led_matrix
-
-  # Yellow "agent needs you" notification: same shape as agent_finished_flash
-  # above, but amber and its own save/restore globals so the two never fight
-  # over which effect/power state to restore.
-  - id: agent_needs_user_flash
-    mode: restart
-    then:
-      - lambda: |-
-          if (!id(needs_user_flash_active)) {
-            id(needs_user_flash_active) = true;
-            id(needs_user_flash_prev_effect) = id(current_effect);
-            id(needs_user_flash_prev_powered) = id(lamp_powered);
-          }
-          id(lamp_powered) = true;
-      - repeat:
-          count: 3
-          then:
-            - light.turn_on:
-                id: led_matrix
-                red: 100%
-                green: 60%
-                blue: 0%
-                brightness: !lambda return lamp_brightness_fraction(id(lamp_brightness_level));
-                effect: "None"
-            - delay: 350ms
-            - light.turn_off:
-                id: led_matrix
-            - delay: 250ms
-      - lambda: |-
-          id(lamp_powered) = id(needs_user_flash_prev_powered);
-          id(current_effect) = id(needs_user_flash_prev_effect);
-          id(needs_user_flash_active) = false;
-      - if:
-          condition:
-            lambda: 'return id(needs_user_flash_prev_powered);'
-          then:
-            - light.turn_on:
-                id: led_matrix
-                effect: !lambda 'return id(needs_user_flash_prev_effect);'
+                effect: !lambda 'return id(flash_prev_effect);'
           else:
             - light.turn_off:
                 id: led_matrix
